@@ -1,1 +1,7 @@
 /target/
+/graph.tar.gz
+/idtypes-stats.txt
+/max_partition_elements.json
+/platforms-stats.txt
+/ruby-explore.rb
+/tapad_sample_11000.txt
