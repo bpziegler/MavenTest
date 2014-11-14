@@ -9,6 +9,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.ResourceIterable;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.Iterables;
+import org.neo4j.kernel.DeadlockDetectedException;
 
 import com.localresponse.tapad_load.TapadLoader.GraphLabels;
 
@@ -55,6 +56,9 @@ public class LoadTask implements Runnable {
                 newNode.setProperty("pid_uid", pid_uid);
             } catch (ConstraintViolationException e) {
                 numConstraint++;
+                newNode.delete();
+            } catch (DeadlockDetectedException e2) {
+                numConstraint++;    // TODO - should have seperate stat, this is very rare though
                 newNode.delete();
             }
         }
