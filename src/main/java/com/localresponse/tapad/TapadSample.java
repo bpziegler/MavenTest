@@ -27,6 +27,10 @@ public class TapadSample {
     private BufferedWriter bw;
     private long numAdd = 0;
     private long numHit = 0;
+    private long numId;
+    private long idLen;
+    private long totDevice;
+    private long numLine;
 
 
     private void run(String tapadFile) throws IOException {
@@ -57,7 +61,7 @@ public class TapadSample {
 
 
     protected String getStatus() {
-        return String.format("NumAdd %,d   NumHit %,d", numAdd, numHit);
+        return String.format("NumAdd %,d   NumHit %,d   Avg Id Len %3.1f   Avg # Device/Line %3.1f", numAdd, numHit, (idLen + 0.0) / numId, (totDevice + 0.0) / numLine);
     }
 
 
@@ -70,6 +74,9 @@ public class TapadSample {
             String idTypeStr = parts.get(0);
             String idStr = parts.get(1);
             String platformStr = parts.get(2);
+            
+            numId++;
+            idLen += idStr.length();
 
             if (random.nextDouble() < 0.00002) {
                 idSet.add(idStr);
@@ -83,6 +90,9 @@ public class TapadSample {
                 }
             }
         }
+        
+        numLine++;
+        totDevice += devices.size();
 
         if (logLine) {
             try {
