@@ -44,9 +44,9 @@ public class TapadPartition {
 
 
 			public String getStatus() {
-				if (System.currentTimeMillis() - lastPartitionCalcTime >= 120 * 1000) {
-					calcSlowStats();
-				}
+                // if (System.currentTimeMillis() - lastPartitionCalcTime >= 120 * 1000) {
+                // calcSlowStats();
+                // }
 				
 				String status = TapadPartition.this.getStatus();
 

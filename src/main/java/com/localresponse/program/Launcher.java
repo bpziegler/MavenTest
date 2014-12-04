@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.localresponse.neo4j_tool.GraphCompactor;
 import com.localresponse.tapad.CheckUnique;
+import com.localresponse.tapad.LargeLines;
 import com.localresponse.tapad.TapadPartition;
 import com.localresponse.tapad_load.TapadLoader;
 
@@ -22,6 +23,7 @@ public class Launcher {
         register(CheckUnique.class);
         register(GraphCompactor.class);
         register(TapadLoader.class);
+        register(LargeLines.class);
 	}
 
 
