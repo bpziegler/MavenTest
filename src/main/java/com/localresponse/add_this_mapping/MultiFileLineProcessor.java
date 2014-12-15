@@ -84,7 +84,7 @@ public class MultiFileLineProcessor {
 
                 String status = String.format(
                         "File %2d   Line %,12d   Elap %,8.1f   Remain %8s   %7.3f %%   MB %,8d   Line/Sec %,8.0f   %s",
-                        fileNum, curLine, elapSec, durStr, 100.0 * curBytes / totBytes, usedMB, linesPerSec,
+                        fileNum, totLines, elapSec, durStr, 100.0 * curBytes / totBytes, usedMB, linesPerSec,
                         extraStatus);
 
                 System.out.println(status);

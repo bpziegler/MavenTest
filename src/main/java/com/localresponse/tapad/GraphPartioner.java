@@ -3,12 +3,10 @@ package com.localresponse.tapad;
 
 import gnu.trove.TLongCollection;
 import gnu.trove.iterator.TLongIterator;
-import gnu.trove.iterator.TLongObjectIterator;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.set.hash.TLongHashSet;
 
 import java.util.HashSet;
-import java.util.IdentityHashMap;
 import java.util.Set;
 
 
@@ -53,10 +51,20 @@ public class GraphPartioner {
 			long nodeInSet = iter.next();
 			longObjectMap.put(nodeInSet, setToUse);
 		}
+		
+		updateMaxPartition(setToUse);
 	}
 
 
-	private TLongHashSet createUnionSet(Set<TLongHashSet> distinctValues) {
+	private void updateMaxPartition(TLongHashSet setToUse) {
+	    if (setToUse.size() > maxPartitionSize) {
+	        maxPartitionSize = setToUse.size();
+	        maxPartition = setToUse;
+	    }
+    }
+
+
+    private TLongHashSet createUnionSet(Set<TLongHashSet> distinctValues) {
 		TLongHashSet result = new TLongHashSet();
 
 		for (TLongHashSet oneSet : distinctValues) {
@@ -67,33 +75,6 @@ public class GraphPartioner {
 	}
 	
 	
-	public int getNumParititions() {
-		IdentityHashMap<TLongHashSet, Integer> map = new IdentityHashMap<TLongHashSet, Integer>();
-		
-		maxPartitionSize = 0;
-		maxPartition = null;
-		
-		TLongObjectIterator<TLongHashSet> iter = longObjectMap.iterator();
-		while (iter.hasNext()) {
-			iter.advance();
-			TLongHashSet val = iter.value();
-			map.put(val, 1);
-			
-			if (val.size() > maxPartitionSize) {
-				maxPartitionSize = val.size();
-				maxPartition = val;
-			}
-		}
-		
-		return map.size();
-	}
-
-
-	public TLongObjectHashMap<TLongHashSet> getLongObjectMap() {
-		return longObjectMap;
-	}
-
-
 	public int getMaxPartitionSize() {
 		return maxPartitionSize;
 	}
@@ -102,5 +83,10 @@ public class GraphPartioner {
 	public TLongHashSet getMaxPartition() {
 		return maxPartition;
 	}
+
+
+    public TLongObjectHashMap<TLongHashSet> getLongObjectMap() {
+        return longObjectMap;
+    }
 
 }

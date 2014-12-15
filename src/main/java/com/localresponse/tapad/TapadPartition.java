@@ -28,15 +28,17 @@ public class TapadPartition {
 	private final HashFunction hashFunction = Hashing.murmur3_128();
 	private final ObjectMapper mapper = new ObjectMapper();
 
-	private int lastNumParition;
-	private long lastPartitionCalcTime;
-	private int lastMaxPartition;
 
-
-	private void run(String tapadFile) throws IOException {
+	private void run(String tapadDir) throws IOException {
 		List<File> list = new ArrayList<File>();
-		list.add(new File(tapadFile));
+		File tapadDirFile = new File(tapadDir);
+		File[] files = tapadDirFile.listFiles();
+		for (File oneFile : files) {
+		    list.add(oneFile);
+		}
+		
 		MultiFileLineProcessor multiLineProcessor = new MultiFileLineProcessor();
+		multiLineProcessor.setUseGzip(true);
 		multiLineProcessor.processFiles(list, new ILineProcessor() {
 			public void processLine(String line, long curLine) {
 				TapadPartition.this.processLine(line, curLine);
@@ -44,35 +46,19 @@ public class TapadPartition {
 
 
 			public String getStatus() {
-                // if (System.currentTimeMillis() - lastPartitionCalcTime >= 120 * 1000) {
-                // calcSlowStats();
-                // }
-				
-				String status = TapadPartition.this.getStatus();
-
-				return status;
+				return TapadPartition.this.getStatus();
 			}
 
 		});
 		
-		calcSlowStats();
 		System.out.println(getStatus());
 	}
 
 
 	private String getStatus() {
-		String status = String.format("Map Size = %,12d   Partitions = %,8d   Max Part = %,8d", graphParitioner
-				.getLongObjectMap().size(), lastNumParition, lastMaxPartition);
+		String status = String.format("Map Size = %,12d   Max Part = %,8d", graphParitioner
+				.getLongObjectMap().size(), graphParitioner.getMaxPartitionSize());
 		return status;
-	}
-
-
-	private void calcSlowStats() {
-		System.out.println("Calc partitions");
-		lastPartitionCalcTime = System.currentTimeMillis();
-		lastNumParition = graphParitioner.getNumParititions();
-		lastMaxPartition = graphParitioner.getMaxPartitionSize();
-		dumpMaxPartition(graphParitioner.getMaxPartition());
 	}
 
 
@@ -105,16 +91,16 @@ public class TapadPartition {
 
 
 	public static void main(String[] args) throws Exception {
-		String tapadFile = "/Users/benziegler/work/tapad/LocalResponse_ids_full_20140827_203357";
+		String tapadDir = "/Users/benziegler/work/tapad/multfiles";
 
 		if (args.length > 0) {
-			tapadFile = args[0];
-			System.out.println("tapadFile = " + tapadFile);
+			tapadDir = args[0];
+			System.out.println("tapadDir = " + tapadDir);
 		}
 
 		TapadPartition tapadPartition = new TapadPartition();
 
-		tapadPartition.run(tapadFile);
+		tapadPartition.run(tapadDir);
 	}
 
 }
