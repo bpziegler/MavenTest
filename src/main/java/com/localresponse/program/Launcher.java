@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.localresponse.misc.ExtractCookieLines;
 import com.localresponse.neo4j_tool.GraphCompactor;
 import com.localresponse.tapad.CheckUnique;
 import com.localresponse.tapad.LargeLines;
@@ -24,6 +25,7 @@ public class Launcher {
         register(GraphCompactor.class);
         register(TapadLoader.class);
         register(LargeLines.class);
+        register(ExtractCookieLines.class);
 	}
 
 
