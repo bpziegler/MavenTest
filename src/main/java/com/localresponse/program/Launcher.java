@@ -12,6 +12,7 @@ import com.localresponse.tapad.CheckUnique;
 import com.localresponse.tapad.LargeLines;
 import com.localresponse.tapad.TapadPartition;
 import com.localresponse.tapad_load.TapadLoader;
+import com.localresponse.tapad_util.TapadUniqueLineAnalyzer;
 
 
 public class Launcher {
@@ -26,6 +27,7 @@ public class Launcher {
         register(TapadLoader.class);
         register(LargeLines.class);
         register(ExtractCookieLines.class);
+        register(TapadUniqueLineAnalyzer.class);
 	}
 
 
