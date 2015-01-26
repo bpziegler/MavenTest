@@ -5,6 +5,7 @@ import gnu.trove.set.hash.TLongHashSet;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +42,11 @@ public class BlueCavaStats {
     private final CountMap OSCounts = new CountMap();
     private final CountMap OSVersionCounts = new CountMap();
     private final CountMap platformIDTypeCounts = new CountMap();
+
+    private final String[] KNOWN_COLUMNS = { "HouseholdID", "MetroCode", "City", "State", "Latitude", "Longitude",
+            "HouseHoldLastSeen", "ConsumerId", "ConsumerToHouseHoldScore", "ConsumerLastSeen", "ScreenID", "OS",
+            "OSVersion", "ScreenPlatform", "PlatformID", "PlatformIDType", "PlatformIDLastSeen" };
+    private List<String> columns;
 
 
     private void run(String tapadDir) throws IOException {
@@ -98,27 +104,25 @@ public class BlueCavaStats {
     }
 
 
-    private void report() {
-        // TODO Auto-generated method stub
-
+    private String getColumn(List<String> parts, String colName) {
+        int idx = columns.indexOf(colName);
+        return parts.get(idx);
     }
 
 
     protected void processLine(String line, long curLine) {
+        List<String> parts = tabSplitter.splitToList(line);
+
         if (curLine == 0) {
+            columns = new ArrayList<String>(parts);
             return;
         }
 
-        List<String> parts = tabSplitter.splitToList(line);
-
-        // 0 HouseholdID, 1 ConsumerID, 2 MetroCode, 3 City, 4 State, 5 Latitude, 6 Longitude, 7 HouseHoldLastSeen, 8
-        // ScreenID, 9 OS, 10 OSVersion, 11 ScreenPlatform, 12 PlatformID, 13 PlatformIDType, 14 PlatformIDLastSeen
-
-        String householdId = parts.get(0);
+        String householdId = getColumn(parts, "HouseholdID");
         long hash = hashFunction.hashString(householdId, Charsets.UTF_8).asLong();
         hashSet.add(hash);
 
-        String lastSeen = parts.get(14);
+        String lastSeen = getColumn(parts, "PlatformIDLastSeen");
         if (!lastSeen.equals("NULL")) {
             LocalDate lastSeenDT = dateFmt.parseLocalDate(lastSeen);
 
@@ -130,10 +134,10 @@ public class BlueCavaStats {
             daysMap.put(numDays, cur);
         }
 
-        String screenPlatform = parts.get(11);
-        String OS = parts.get(9);
-        String OSVersion = parts.get(9) + " " + parts.get(10);
-        String platformIDType = parts.get(13);
+        String screenPlatform = getColumn(parts, "ScreenPlatform");
+        String OS = getColumn(parts, "OS");
+        String OSVersion = OS + " " + getColumn(parts, "OSVersion");
+        String platformIDType = getColumn(parts, "PlatformIDType");
 
         screenPlatformCounts.updateCount(screenPlatform);
         OSCounts.updateCount(OS);
