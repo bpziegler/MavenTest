@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.localresponse.misc.ExtractCookieLines;
 import com.localresponse.neo4j_tool.GraphCompactor;
+import com.localresponse.neo4j_tool.GraphUniquePropertyChecker;
 import com.localresponse.tapad.CheckUnique;
 import com.localresponse.tapad.LargeLines;
 import com.localresponse.tapad.TapadPartition;
@@ -30,6 +31,7 @@ public class Launcher {
         register(ExtractCookieLines.class);
         register(TapadUniqueLineAnalyzer.class);
         register(BlueCavaStats.class);
+        register(GraphUniquePropertyChecker.class);
     }
 
 
