@@ -1,7 +1,7 @@
 package com.localresponse.neo4j_tool;
 
 
-import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -22,16 +23,34 @@ import com.google.common.base.Charsets;
 
 public class GraphUniquePropertyChecker {
 
+    private static final int BUF_SIZE = 1024 * 1024;
     private final String srcGraphDir;
     private final GraphDatabaseService srcDb;
     private final List<String> uniqueProperties = Arrays.asList("guid", "ownza_id", "ip_address", "pid_uid",
             "bc_household_id", "idfa", "android_ad_id", "android_id", "android_id_sha1", "android_id_md5");
-    private final HashMap<String, OutputStreamWriter> streamMap = new HashMap<String, OutputStreamWriter>();
+    private final HashMap<String, BufferedWriter> streamMap = new HashMap<String, BufferedWriter>();
+    private final AtomicBoolean needShutdown = new AtomicBoolean(true);
 
 
     public GraphUniquePropertyChecker(String srcGraphDir) {
         this.srcGraphDir = srcGraphDir;
         this.srcDb = new GraphDatabaseFactory().newEmbeddedDatabase(srcGraphDir);
+        registerShutdownHook(this.srcDb, needShutdown);
+    }
+
+
+    private static void registerShutdownHook(final GraphDatabaseService graphDb, final AtomicBoolean needShutdown) {
+        // Registers a shutdown hook for the Neo4j instance so that it
+        // shuts down nicely when the VM exits (even if you "Ctrl-C" the
+        // running application).
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                if (needShutdown.get()) {
+                    graphDb.shutdown();
+                }
+            }
+        });
     }
 
 
@@ -46,6 +65,7 @@ public class GraphUniquePropertyChecker {
 
         System.out.println("Shutting down srcDb");
         srcDb.shutdown();
+        needShutdown.set(false);    // Let the shutdownHook no it doesn't need to shutdown the database
     }
 
 
@@ -64,12 +84,10 @@ public class GraphUniquePropertyChecker {
         int num = 0;
         for (Node oneNode : iter) {
             long nodeId = oneNode.getId();
-            Map<String, Object> props = getProperties(oneNode);
-            // System.out.println(nodeId + "  " + props);
 
-            for (String propName : props.keySet()) {
+            for (String propName : oneNode.getPropertyKeys()) {
                 if (uniqueProperties.indexOf(propName) != -1) {
-                    Object val = props.get(propName);
+                    Object val = oneNode.getProperty(propName);
                     logPropertyValue(propName, val, nodeId);
                 }
             }
@@ -82,8 +100,8 @@ public class GraphUniquePropertyChecker {
 
         System.out.println(String.format("MaxId = %,10d   NumId = %,10d", maxId, num));
 
-        for (OutputStreamWriter osw : streamMap.values()) {
-            osw.close();
+        for (BufferedWriter bw : streamMap.values()) {
+            bw.close();
         }
 
         return num;
@@ -91,17 +109,17 @@ public class GraphUniquePropertyChecker {
 
 
     private void logPropertyValue(String propName, Object val, long nodeId) throws IOException {
-        OutputStreamWriter osw = streamMap.get(propName);
-        if (osw == null) {
+        BufferedWriter bw = streamMap.get(propName);
+        if (bw == null) {
             String path = propName + ".txt";
             System.out.println("Creating log file:  " + path);
             FileOutputStream fs = new FileOutputStream(path);
-            BufferedOutputStream bf = new BufferedOutputStream(fs);
-            osw = new OutputStreamWriter(bf, Charsets.UTF_8);
-            streamMap.put(propName, osw);
+            OutputStreamWriter osw = new OutputStreamWriter(fs, Charsets.UTF_8);
+            bw = new BufferedWriter(osw, BUF_SIZE);
+            streamMap.put(propName, bw);
         }
 
-        osw.write(val + "\t" + nodeId + "\n");
+        bw.write(val + "\t" + nodeId + "\n");
     }
 
 
@@ -132,7 +150,11 @@ public class GraphUniquePropertyChecker {
         }
 
         GraphUniquePropertyChecker program = new GraphUniquePropertyChecker(srcDir);
-        program.run();
+        try {
+            program.run();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }
