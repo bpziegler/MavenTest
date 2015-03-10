@@ -85,12 +85,12 @@ public class GraphUniquePropertyChecker {
         for (Node oneNode : iter) {
             long nodeId = oneNode.getId();
 
-            for (String propName : oneNode.getPropertyKeys()) {
-                if (uniqueProperties.indexOf(propName) != -1) {
-                    Object val = oneNode.getProperty(propName);
-                    logPropertyValue(propName, val, nodeId);
-                }
-            }
+//            for (String propName : oneNode.getPropertyKeys()) {
+//                if (uniqueProperties.indexOf(propName) != -1) {
+//                    Object val = oneNode.getProperty(propName);
+//                    logPropertyValue(propName, val, nodeId);
+//                }
+//            }
 
             num++;
             if (System.currentTimeMillis() - lastLog >= 250) {
