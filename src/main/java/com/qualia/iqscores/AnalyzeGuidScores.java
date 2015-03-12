@@ -28,11 +28,11 @@ public class AnalyzeGuidScores {
 
     private final ObjectMapper mapper = new ObjectMapper();
     private final Splitter splitter = Splitter.on("\t");
-    private final ArrayList<String> labels = new ArrayList<String>();
-    private final int[] counts = new int[KNOWN_TAGS.length];
-    private final int[][] cond_counts = new int[KNOWN_TAGS.length][];
-    private final HashMap<String, Integer> fieldIdx = new HashMap<String, Integer>();
-    private String last_guid;
+    private final ArrayList<String> labels = new ArrayList<String>();       // Labels assigned to the current GUID (User).
+    private final int[] counts = new int[KNOWN_TAGS.length];                // Counts number of times a TAG (based on index on KNOWN_TAGS) is seen in the file
+    private final int[][] cond_counts = new int[KNOWN_TAGS.length][];       // "Conditional" counts.  First index is the TAG (Index) that is given to exist, the 2nd index is the TAG count for number of occurrences.
+    private final HashMap<String, Integer> fieldIdx = new HashMap<String, Integer>();       // Maps the Tag (Field) to its index in KNOWN_TAGS
+    private String last_guid;                                               // The input file is sorted by GUID, so this lets us track when we are in a new grouping
     private long numGuid = 0;
 
 
