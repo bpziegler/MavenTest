@@ -1,14 +1,21 @@
 package com.qualia.hbase;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.hadoop.hbase.thrift.generated.BatchMutation;
 import org.apache.hadoop.hbase.thrift.generated.Hbase;
 import org.apache.hadoop.hbase.thrift.generated.Hbase.Client;
+import org.apache.hadoop.hbase.thrift.generated.IOError;
+import org.apache.hadoop.hbase.thrift.generated.IllegalArgument;
+import org.apache.hadoop.hbase.thrift.generated.Mutation;
+import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.transport.TSocket;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -30,6 +37,7 @@ public class AddThisMappingLoader {
 	private List<Mapping> readyMappings = new ArrayList<Mapping>();
 	private List<Mapping> waitingMappings = new ArrayList<Mapping>();
 	private Set<String> locks = new HashSet<String>();
+	private ArrayList<BatchMutation> batchMutations = new ArrayList<BatchMutation>(); 
 	
 	private static class Mapping {
 		public String deviceKey1;
@@ -38,6 +46,16 @@ public class AddThisMappingLoader {
 			super();
 			this.deviceKey1 = deviceKey1;
 			this.deviceKey2 = deviceKey2;
+		}
+	}
+
+	// Helper to translate strings to UTF8 bytes
+	private static ByteBuffer bytes(String s) {
+		try {
+			return ByteBuffer.wrap(s.getBytes("UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			return null;
 		}
 	}
 
@@ -83,7 +101,7 @@ public class AddThisMappingLoader {
 		String pidUidPairsList = parts.get(2);
 		List<String> pidUidPairs = commaSplitter.splitToList(pidUidPairsList);
 		String lrDeviceKey = "pu_" + "lr_" + lr_uid;
-		setKeyValBatch("props", lrDeviceKey, "last_seen", dtStr);
+		setKeyValBatch("props", lrDeviceKey, "f1:last_seen", dtStr);
 		for (String pidUidPair : pidUidPairs) {
 			List<String> pidUidParts = equalSplitter.splitToList(pidUidPair);
 			String pidCode = pidUidParts.get(0);
@@ -93,7 +111,7 @@ public class AddThisMappingLoader {
 				continue;
 			}
 			String mappedDeviceKey = "pu_" + pid + "_" + uid;
-			setKeyValBatch("props", mappedDeviceKey, "last_seen", dtStr);
+			setKeyValBatch("props", mappedDeviceKey, "f1:last_seen", dtStr);
 			createMapping(lrDeviceKey, mappedDeviceKey);
 		}
 		
@@ -137,8 +155,22 @@ public class AddThisMappingLoader {
 		}
 	}
 
-	private void setKeyValBatch(String tableName, String key, String colName,
+	private void setKeyValBatch(String tableName, String rowKey, String colName,
 			String colValue) {
+		Mutation mutation = new Mutation(false, bytes(colName), bytes(colValue), false);
+		ArrayList<Mutation> mutationList = new ArrayList<Mutation>();
+		mutationList.add(mutation);
+		BatchMutation batchMutation = new BatchMutation(bytes(rowKey), mutationList);
+		batchMutations.add(batchMutation);
+		
+		if (batchMutations.size() >= 1000) {
+			try {
+				client.mutateRows(bytes(tableName), batchMutations, null);
+				batchMutations.clear();
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
 	}
 
 	public static void main(String[] args) throws Exception {
