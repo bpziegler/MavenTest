@@ -1,24 +1,33 @@
 package com.qualia.test;
 
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
 public class MessagePassTest {
     
     private final ArrayBlockingQueue<Object> queue = new ArrayBlockingQueue<Object>(100000);
-    private AtomicBoolean doneFlag = new AtomicBoolean();
+    private final AtomicBoolean doneFlag = new AtomicBoolean();
+    private final CyclicBarrier barrier = new CyclicBarrier(2);
 
     private static class Sender implements Runnable {
         private ArrayBlockingQueue<Object> queue;
         private AtomicBoolean doneFlag;
+        private CyclicBarrier barrier;
 
-        public Sender(ArrayBlockingQueue<Object> queue, AtomicBoolean doneFlag) {
+        public Sender(ArrayBlockingQueue<Object> queue, AtomicBoolean doneFlag, CyclicBarrier barrier) {
             this.queue = queue;
             this.doneFlag = doneFlag;
+            this.barrier = barrier;
         }
 
         public void run() {
+            try {
+                barrier.await();
+            } catch (Exception e1) {
+                throw new RuntimeException(e1);
+            }
             for (int i = 0; i < 10 * 1000 * 1000; i++) {
                 String s = Integer.toString(i);
                 try {
@@ -36,13 +45,20 @@ public class MessagePassTest {
     private static class Receiver implements Runnable {
         private ArrayBlockingQueue<Object> queue;
         private AtomicBoolean doneFlag;
+        private CyclicBarrier barrier;
 
-        public Receiver(ArrayBlockingQueue<Object> queue, AtomicBoolean doneFlag) {
+        public Receiver(ArrayBlockingQueue<Object> queue, AtomicBoolean doneFlag, CyclicBarrier barrier) {
             this.queue = queue;
             this.doneFlag = doneFlag;
+            this.barrier = barrier;
         }
 
         public void run() {
+            try {
+                barrier.await();
+            } catch (Exception e1) {
+                throw new RuntimeException(e1);
+            }
             long numRecv = 0;
             while (true) {
                 Object msg = queue.poll();
@@ -58,8 +74,8 @@ public class MessagePassTest {
 
 
     public void run() throws InterruptedException {
-        Sender sender = new Sender(queue, doneFlag);
-        Receiver receiver = new Receiver(queue, doneFlag);
+        Sender sender = new Sender(queue, doneFlag, barrier);
+        Receiver receiver = new Receiver(queue, doneFlag, barrier);
 
         Thread senderThread = new Thread(sender);
         senderThread.start();
