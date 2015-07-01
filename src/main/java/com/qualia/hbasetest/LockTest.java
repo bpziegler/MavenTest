@@ -40,7 +40,8 @@ public class LockTest {
 
 		@Override
 		public void run() {
-			// TODO:  Need shutdown logic when no more lockables will be added to needLocksQueue
+			// Number of lockables we have sent to the output queue, but need to later release their locks
+			int needReturn = 0;
 			
 			while (true) {
 				// Check if we have some locks to release
@@ -51,6 +52,7 @@ public class LockTest {
 					releaseLocks(lockable);
 				}
 				localReleaseList.clear();
+				needReturn -= numReleased;
 
 				// Check if any of the waiting lockables get can their locks
 				Iterator<Lockable> waitingIter = waiting.iterator();
@@ -63,6 +65,7 @@ public class LockTest {
 						acquireLocks(lockable);
 						waitingIter.remove();
 						haveLocksQueue.add(lockable);
+						needReturn++;
 					}
 				}
 				
@@ -75,6 +78,10 @@ public class LockTest {
 					}
 					waiting.add(nextLockable);
 					numAdd++;
+				}
+				
+				if (needLocksQueue.size() == 0 && canShutdown.get()) {
+					break;
 				}
 				
 				if (numAdd == 0 && numReleased == 0) {
