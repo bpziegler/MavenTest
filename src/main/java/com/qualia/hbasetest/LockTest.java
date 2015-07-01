@@ -55,6 +55,7 @@ public class LockTest {
 				needReturn -= numReleased;
 
 				// Check if any of the waiting lockables get can their locks
+				int numCheckFail = 0;
 				Iterator<Lockable> waitingIter = waiting.iterator();
 				while (waitingIter.hasNext()) {
 					if (locks.size() >= MAX_LOCKS) {
@@ -64,10 +65,14 @@ public class LockTest {
 					if (canGetLocks(lockable)) {
 						acquireLocks(lockable);
 						waitingIter.remove();
-						haveLocksQueue.add(lockable);
+						haveLocksQueue.add(lockable); // TODO: lockables can have their own optional "put back" queue
 						needReturn++;
+					} else {
+					    numCheckFail++;
 					}
 				}
+				
+				// TODO:  If numCheckFail is above some threshold, we should use a High/Low watermark for when we resume checks
 				
 				// Check if we can process lockables from the input queue
 				int numAdd = 0;
