@@ -33,6 +33,7 @@ public class LockerThread extends Thread {
     // timestamp
     private final Set<String> locks = new HashSet<String>();
     private final List<Lockable> localReleaseList = new ArrayList<Lockable>();
+    private long totCheckFail;
 
 
     @Override
@@ -74,6 +75,7 @@ public class LockerThread extends Thread {
                     numCheckFail++;
                 }
             }
+            totCheckFail += numCheckFail;
 
             // TODO: If numCheckFail is above some threshold, we should use a High/Low watermark for when we resume
             // checks
@@ -102,6 +104,8 @@ public class LockerThread extends Thread {
                 }
             }
         }
+        
+        System.out.println("totCheckFail = " + totCheckFail);
     }
 
 

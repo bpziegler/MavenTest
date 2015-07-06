@@ -9,6 +9,7 @@ import java.util.Random;
 public class LockTest {
 
     private static final int NUM_TEST = 1000 * 1000;
+    private static final int RANDOM_RANGE = 50;
 
     private static class TestLockable implements Lockable {
 
@@ -40,7 +41,7 @@ public class LockTest {
             for (int i = 0; i < NUM_TEST; i++) {
                 TestLockable testLockable = new TestLockable();
                 while (testLockable.neededLocks.size() < 2) {
-                    String s = String.format("%06d", random.nextInt(100 * 1000));
+                    String s = String.format("%010d", random.nextInt(RANDOM_RANGE));
                     if (!testLockable.neededLocks.contains(s)) {
                         testLockable.neededLocks.add(s);
                     }
@@ -63,6 +64,8 @@ public class LockTest {
 
     public static class ReceiveThread extends Thread {
         private final LockerThread lockerThread;
+        private long start;
+        private long numReceive;
 
 
         public ReceiveThread(LockerThread lockerThread) {
@@ -73,8 +76,8 @@ public class LockTest {
 
         @Override
         public void run() {
-            long start = System.currentTimeMillis();
-            int numReceive = 0;
+            start = System.currentTimeMillis();
+            numReceive = 0;
 
             while (lockerThread.isAlive()) {
                 Lockable next = lockerThread.haveLocksQueue.poll();
@@ -86,14 +89,21 @@ public class LockTest {
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
+                    if (numReceive % 50000 == 0) {
+                        dumpStats();
+                    }
                 }
             }
 
-            long elap = System.currentTimeMillis() - start;
-            System.out.println("Num Receive = " + numReceive);
-            System.out.println("Receive Elap = " + elap);
-            double rate = (numReceive + 0.0) / ((elap + 0.0) / 1000);
-            System.out.println(String.format("Rate = %6.0f lockables/sec", rate));
+            dumpStats();
+        }
+
+
+        private void dumpStats() {
+            double elap = (System.currentTimeMillis() - start + 0.0) / 1000;
+            double rate = numReceive / elap;
+            System.out.println(String.format("Receive %8d   Elap %6.1f   Rate = %6.0f lockables/sec", numReceive, elap,
+                    rate));
         }
 
     }
@@ -107,6 +117,8 @@ public class LockTest {
         lockerThread.start();
         pushThread.start();
         receiveThread.start();
+
+        System.out.println("All threads started");
 
         lockerThread.join();
         pushThread.join();
