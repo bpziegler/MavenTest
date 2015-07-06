@@ -9,7 +9,7 @@ import java.util.Random;
 public class LockTest {
 
     private static final int NUM_TEST = 1000 * 1000;
-    private static final int RANDOM_RANGE = 50;
+    private static final int RANDOM_RANGE = 5000;     // 50 = 164501 lockables/sec, 5000 = 244738 lockables/sec
 
     private static class TestLockable implements Lockable {
 
