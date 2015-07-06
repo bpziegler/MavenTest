@@ -34,6 +34,7 @@ public class LockerThread extends Thread {
     private final Set<String> locks = new HashSet<String>();
     private final List<Lockable> localReleaseList = new ArrayList<Lockable>();
     private long totCheckFail;
+    private int maxNeedReturn;
 
 
     @Override
@@ -71,6 +72,9 @@ public class LockerThread extends Thread {
                         throw new RuntimeException(e);
                     }
                     needReturn++;
+                    if (needReturn > maxNeedReturn) {
+                        maxNeedReturn = needReturn;
+                    }
                 } else {
                     numCheckFail++;
                 }
@@ -105,7 +109,7 @@ public class LockerThread extends Thread {
             }
         }
         
-        System.out.println("totCheckFail = " + totCheckFail);
+        System.out.println("totCheckFail = " + totCheckFail + "   maxNeedReturn = " + maxNeedReturn);
     }
 
 
@@ -124,6 +128,7 @@ public class LockerThread extends Thread {
 
 
     private boolean canGetLocks(Lockable lockable) {
+        // TODO:  Add a check that all locks within this lockable are UNIQUE
         for (String oneLock : lockable.getNeededLocks()) {
             if (locks.contains(oneLock)) {
                 return false;
