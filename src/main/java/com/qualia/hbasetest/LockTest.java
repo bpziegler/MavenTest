@@ -45,6 +45,7 @@ public class LockTest {
 			
 			while (true) {
 				// Check if we have some locks to release
+				localReleaseList.clear();
 				releaseLocksQueue.drainTo(localReleaseList);
 				int numReleased = localReleaseList.size();
 
@@ -85,7 +86,7 @@ public class LockTest {
 					numAdd++;
 				}
 				
-				if (needLocksQueue.size() == 0 && canShutdown.get()) {
+				if (needReturn == 0 && waiting.size() == 0 && needLocksQueue.size() == 0 && canShutdown.get()) {
 					break;
 				}
 				
