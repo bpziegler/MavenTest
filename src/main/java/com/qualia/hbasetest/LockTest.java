@@ -30,7 +30,7 @@ public class LockTest {
 		public void run() {
 			int numPush = 0;
 			Random random = new Random();
-			for (int i = 0; i < 20 * 1000; i++) {
+			for (int i = 0; i < 200 * 1000; i++) {
 				TestLockable testLockable = new TestLockable();
 				for (int j = 0; j < 2; j++) {
 					String s = String.format("%06d", random.nextInt(100 * 1000));
@@ -39,6 +39,7 @@ public class LockTest {
 
 				try {
 					numPush++;
+					System.out.println("push " + numPush);
 					lockerThread.needLocksQueue.put(testLockable);
 				} catch (InterruptedException e) {
 					throw new RuntimeException(e);
@@ -69,6 +70,7 @@ public class LockTest {
 				if (next != null) {
 					numReceive++;
 					try {
+						System.out.println("receive " + numReceive);
 						lockerThread.releaseLocksQueue.put(next);
 					} catch (InterruptedException e) {
 						throw new RuntimeException(e);
