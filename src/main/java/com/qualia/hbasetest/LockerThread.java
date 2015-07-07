@@ -15,17 +15,17 @@ public class LockerThread extends Thread {
 
     // Maximum number of *individual* locks. Some objects request more than
     // one lock, and each one counts towards this.
-    public static int MAX_LOCKS = 5000;
     public static int MAX_LOCKABLES_WAITING = 1000;
+    public static int MAX_LOCKS = MAX_LOCKABLES_WAITING * 5;
 
     public AtomicBoolean canShutdown = new AtomicBoolean();
 
     // Input Queues
-    public final BlockingQueue<Lockable> needLocksQueue = new ArrayBlockingQueue<Lockable>(1000);
-    public final BlockingQueue<Lockable> releaseLocksQueue = new ArrayBlockingQueue<Lockable>(1000 * 10);
+    public final BlockingQueue<Lockable> needLocksQueue = new ArrayBlockingQueue<Lockable>(MAX_LOCKABLES_WAITING);
+    public final BlockingQueue<Lockable> releaseLocksQueue = new ArrayBlockingQueue<Lockable>(MAX_LOCKABLES_WAITING * 10);
 
     // Output Queues
-    public final BlockingQueue<Lockable> haveLocksQueue = new ArrayBlockingQueue<Lockable>(1000);
+    public final BlockingQueue<Lockable> haveLocksQueue = new ArrayBlockingQueue<Lockable>(MAX_LOCKABLES_WAITING);
 
     // Internal
     private final List<Lockable> waiting = new ArrayList<Lockable>();
