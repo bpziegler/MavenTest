@@ -1,9 +1,6 @@
 package com.qualia.flatset;
 
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Set;
@@ -19,9 +16,6 @@ public class FlatSet {
     private final Set<LongWrapper> memorySet = new TreeSet<LongWrapper>();
     private long totArrayBytes = 0;
     private final ArrayList<long[]> arrays = new ArrayList<long[]>();
-
-    private final ByteArrayOutputStream bs = new ByteArrayOutputStream();
-    private final DataOutputStream ds = new DataOutputStream(bs);
 
 
     public void joinIds(long id1, long id2) {
@@ -60,21 +54,6 @@ public class FlatSet {
         // System.out.println("Adding byteArray " + byteArray.length);
         totArrayBytes += longArray.length * BYTES_PER_LONG;
         arrays.add(longArray);
-    }
-
-
-    public byte[] getBytes(long id1, long id2) {
-        try {
-            byte[] result = null;
-            bs.reset();
-            ds.writeLong(id1);
-            ds.writeLong(id2);
-            ds.flush();
-            result = bs.toByteArray();
-            return result;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
 
