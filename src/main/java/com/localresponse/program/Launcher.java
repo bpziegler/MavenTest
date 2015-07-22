@@ -15,6 +15,7 @@ import com.localresponse.tapad.TapadPartition;
 import com.localresponse.tapad_load.TapadLoader;
 import com.localresponse.tapad_util.TapadUniqueLineAnalyzer;
 import com.qualia.bluecava.BlueCavaStats;
+import com.qualia.test.RocksTest;
 
 
 public class Launcher {
@@ -32,6 +33,7 @@ public class Launcher {
         register(TapadUniqueLineAnalyzer.class);
         register(BlueCavaStats.class);
         register(GraphUniquePropertyChecker.class);
+        register(RocksTest.class);
     }
 
 
