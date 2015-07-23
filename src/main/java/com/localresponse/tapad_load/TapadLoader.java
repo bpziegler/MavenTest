@@ -12,8 +12,8 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
-import com.localresponse.add_this_mapping.ILineProcessor;
-import com.localresponse.add_this_mapping.MultiFileLineProcessor;
+import com.qualia.util.ILineProcessor;
+import com.qualia.util.MultiFileLineProcessor;
 
 
 public class TapadLoader {

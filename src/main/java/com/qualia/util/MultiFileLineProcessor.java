@@ -1,4 +1,4 @@
-package com.localresponse.add_this_mapping;
+package com.qualia.util;
 
 
 import java.io.BufferedReader;
@@ -51,6 +51,8 @@ public class MultiFileLineProcessor {
 
 
     private void processFile(File oneFile, int fileNum) throws IOException {
+        //System.out.println("Process file:  " + oneFile.getAbsolutePath());
+        
         FileInputStream fs = new FileInputStream(oneFile);
         CountingInputStream cs = new CountingInputStream(fs);
         InputStream nextStream = cs;

@@ -1,4 +1,4 @@
-package com.localresponse.add_this_mapping;
+package com.qualia.util;
 
 public interface ILineProcessor {
 	public void processLine(String line, long curLine);

@@ -8,8 +8,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.google.common.base.Splitter;
-import com.localresponse.add_this_mapping.ILineProcessor;
-import com.localresponse.add_this_mapping.MultiFileLineProcessor;
+import com.qualia.util.ILineProcessor;
+import com.qualia.util.MultiFileLineProcessor;
 
 
 public class LargeLines {

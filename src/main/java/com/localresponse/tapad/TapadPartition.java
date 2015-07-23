@@ -19,8 +19,8 @@ import com.google.common.base.Splitter;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
-import com.localresponse.add_this_mapping.ILineProcessor;
-import com.localresponse.add_this_mapping.MultiFileLineProcessor;
+import com.qualia.util.ILineProcessor;
+import com.qualia.util.MultiFileLineProcessor;
 
 
 public class TapadPartition {

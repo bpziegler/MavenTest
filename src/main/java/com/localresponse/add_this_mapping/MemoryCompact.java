@@ -17,6 +17,8 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
+import com.qualia.util.ILineProcessor;
+import com.qualia.util.MultiFileLineProcessor;
 
 
 public class MemoryCompact implements ILineProcessor {
