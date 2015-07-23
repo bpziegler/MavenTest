@@ -7,6 +7,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
+import org.rocksdb.WriteBatch;
+import org.rocksdb.WriteOptions;
 
 
 public class PutThread implements Runnable {
@@ -42,6 +44,12 @@ public class PutThread implements Runnable {
         RocksDB.loadLibrary();
         RocksDB db = RocksDB.open("test-db");
 
+        WriteBatch writeBatch = new WriteBatch();
+        WriteOptions writeOptions = new WriteOptions();
+        writeOptions.setSync(false);
+        writeOptions.setDisableWAL(true);
+        int numBatch = 0;
+
         while (true) {
             Object obj = queue.poll();
             if (obj == null) {
@@ -50,7 +58,15 @@ public class PutThread implements Runnable {
             } else if (obj instanceof PutKeyValue) {
                 num++;
                 PutKeyValue putKeyVal = (PutKeyValue) obj;
-                db.put(putKeyVal.getKey(), putKeyVal.getVal());
+
+                writeBatch.put(putKeyVal.getKey(), putKeyVal.getVal());
+                numBatch++;
+
+                if (numBatch % 1000 == 0) {
+                    db.write(writeOptions, writeBatch);
+                    numBatch = 0;
+                    writeBatch = new WriteBatch();
+                }
 
                 if (num % 50000 == 0) {
                     dumpStats(num, start);
@@ -58,6 +74,10 @@ public class PutThread implements Runnable {
             } else {
                 throw new RuntimeException("Unknown object type");
             }
+        }
+
+        if (numBatch > 0) {
+            db.write(writeOptions, writeBatch);
         }
 
         db.close();
@@ -69,7 +89,7 @@ public class PutThread implements Runnable {
         double elap = (0.0 + System.currentTimeMillis() - start) / 1000.0;
         double putPerSec = (num + 0.0) / elap;
         double memUsed = (0.0 + Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (1024 * 1024);
-        System.out.println(String.format("File %,6d of %,6d   Put %,12d   Elap %,8.1f   Put/Sec %,8.0f   MB %6.0f", 
+        System.out.println(String.format("File %,6d of %,6d   Put %,12d   Elap %,8.1f   Put/Sec %,8.0f   MB %6.0f",
                 completedFiles.get(), maxFiles, num, elap, putPerSec, memUsed));
     }
 
