@@ -113,7 +113,7 @@ public class RocksCookieTest implements Runnable {
         final AtomicBoolean doneFlag = new AtomicBoolean();
         final AtomicInteger completedFiles = new AtomicInteger();
 
-        String dir = "/Users/benziegler/test_data/cookies";
+        String dir = "/home/bziegler/work/test_data/cookie_files";
         if (args.length > 0) {
             dir = args[0];
             System.out.println("dir = " + dir);
@@ -125,11 +125,11 @@ public class RocksCookieTest implements Runnable {
         Thread thread = new Thread(new PutThread(queue, doneFlag, completedFiles, list.size()));
         thread.start();
 
+        
         for (File oneFile : list) {
             RocksCookieTest program = new RocksCookieTest(queue, completedFiles, oneFile.getAbsolutePath());
             executor.submit(program);
         }
-
         executor.shutdown();
         executor.awaitTermination(100, TimeUnit.DAYS);
 
