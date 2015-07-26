@@ -44,8 +44,11 @@ public class PutThread implements Runnable {
 
         RocksDB.loadLibrary();
         Options options = new Options();
-        options.prepareForBulkLoad();
+        // options.prepareForBulkLoad();
         options.setCreateIfMissing(true);
+        options.setIncreaseParallelism(8);
+        options.setMaxBackgroundCompactions(4);
+        options.setMaxBackgroundFlushes(4);
         RocksDB db = RocksDB.open(options, "test-db");
 
         WriteOptions writeOptions = new WriteOptions();
@@ -86,8 +89,8 @@ public class PutThread implements Runnable {
             db.write(writeOptions, writeBatch);
         }
         
-        System.out.println("Compacting");
-        db.compactRange();
+//        System.out.println("Compacting");
+//        db.compactRange();
 
         db.close();
         dumpStats(num, start);

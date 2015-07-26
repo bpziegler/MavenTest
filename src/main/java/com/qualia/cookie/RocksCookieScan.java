@@ -15,7 +15,7 @@ public class RocksCookieScan {
         long start = System.currentTimeMillis();
 
         RocksDB.loadLibrary();
-        RocksDB db = RocksDB.open("test-db");
+        RocksDB db = RocksDB.openReadOnly("test-db");
 
         RocksIterator iter = db.newIterator();
         iter.seekToFirst();
