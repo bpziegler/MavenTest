@@ -10,14 +10,13 @@ import com.localresponse.util.CountMap;
 
 public class RocksCookieScan {
 
-    private static long dumpStats(long start, long num, byte[] key, String valStr) {
+    private static long dumpStats(long start, long num, String keyStr, String valStr) {
         long lastLog;
         lastLog = System.currentTimeMillis();
 
         double elap = (0.0 + System.currentTimeMillis() - start) / 1000.0;
         double putPerSec = (num + 0.0) / elap;
         double memUsed = (0.0 + Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (1024 * 1024);
-        String keyStr = new String(key);
         System.out.println(String.format("Num %,12d   Elap %,8.1f   Num/Sec %,12.0f   MB %6.0f   Key %-40s   Value %s",
                 num, elap, putPerSec, memUsed, keyStr, valStr));
         return lastLog;
@@ -42,11 +41,12 @@ public class RocksCookieScan {
         while (iter.isValid()) {
             byte[] key = iter.key();
             byte[] val = iter.value();
+            String keyStr = new String(key);
             String valStr = new String(val);
             countMap.updateCount(valStr);
 
             if ((num % 1000 == 0) && (System.currentTimeMillis() - lastLog >= 100)) {
-                lastLog = dumpStats(start, num, key, valStr);
+                lastLog = dumpStats(start, num, keyStr, valStr);
             }
 
             iter.next();
