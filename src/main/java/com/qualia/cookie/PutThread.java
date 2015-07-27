@@ -18,13 +18,20 @@ public class PutThread implements Runnable {
     private final BlockingQueue<Object> queue;
     private final AtomicInteger completedFiles;
     private final int maxFiles;
+    private int numCompactThreads;
+    private int numFlushThreads;
+    private int bulkLoad;
 
 
-    public PutThread(BlockingQueue<Object> queue, AtomicBoolean doneFlag, AtomicInteger completedFiles, int maxFiles) {
+    public PutThread(BlockingQueue<Object> queue, AtomicBoolean doneFlag, AtomicInteger completedFiles, int maxFiles,
+            int numCompactThreads, int numFlushThreads, int bulkLoad) {
         this.queue = queue;
         this.doneFlag = doneFlag;
         this.completedFiles = completedFiles;
         this.maxFiles = maxFiles;
+        this.numCompactThreads = numCompactThreads;
+        this.numFlushThreads = numFlushThreads;
+        this.bulkLoad = bulkLoad;
     }
 
 
@@ -44,11 +51,13 @@ public class PutThread implements Runnable {
 
         RocksDB.loadLibrary();
         Options options = new Options();
-        options.prepareForBulkLoad();
         options.setCreateIfMissing(true);
-//        options.setMaxBackgroundCompactions(4);
-//        options.setMaxBackgroundFlushes(4);
-//        options.setIncreaseParallelism(8);
+        if (bulkLoad != 0) {
+            options.prepareForBulkLoad();
+        }
+        options.setIncreaseParallelism(numCompactThreads + numFlushThreads);
+        options.setMaxBackgroundCompactions(numCompactThreads);
+        options.setMaxBackgroundFlushes(numFlushThreads);
         RocksDB db = RocksDB.open(options, "test-db");
 
         WriteBatch writeBatch = new WriteBatch();
@@ -60,7 +69,7 @@ public class PutThread implements Runnable {
         while (true) {
             Object obj = queue.poll();
             if (obj == null) {
-                if (doneFlag.get() && queue.size() == 0)    // Note we check the queue size AGAIN for thread safety
+                if (doneFlag.get() && queue.size() == 0) // Note we check the queue size AGAIN for thread safety
                     break;
             } else if (obj instanceof PutKeyValue) {
                 num++;
@@ -88,8 +97,11 @@ public class PutThread implements Runnable {
             db.write(writeOptions, writeBatch);
         }
 
-        System.out.println("Major compaction");
-        db.compactRange();
+        if (bulkLoad != 0) {
+            System.out.println("Major compaction");
+            db.compactRange();
+        }
+
         System.out.println("Closing");
         db.close();
         dumpStats(num, start);

@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -18,6 +19,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.GZIPInputStream;
 
+import org.apache.commons.cli.BasicParser;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
 import org.rocksdb.RocksDBException;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -108,21 +114,41 @@ public class RocksCookieTest implements Runnable {
 
 
     public static void main(String[] args) throws Exception {
-        ExecutorService executor = Executors.newFixedThreadPool(4);
+        Options options = new Options();
+        options.addOption("d", "loaddir", true, "Directory with input cookie files");
+        options.addOption("l", "loadthreads", true, "Number of load threads to parse the cookie files");
+        options.addOption("c", "compactthreads", true, "Number of compaction threads");
+        options.addOption("f", "flushthreads", true, "Number of flush threads");
+        options.addOption("b", "bulkload", true, "Boolean to do bulk load (no compactions until after all loading)");
+        options.addOption("h", "help", false, "Print usage help");
+
+        CommandLineParser parser = new BasicParser();
+        CommandLine cmd = parser.parse(options, args);
+
+        System.out.println("Options = " + Arrays.toString(cmd.getOptions()));
+        String loadDir = cmd.getOptionValue("loaddir", "/Users/benziegler/test_data/cookies");
+        System.out.println("loadDir = " + loadDir);
+        int numLoadThread = Integer.valueOf(cmd.getOptionValue("loadthreads", "4"));
+        int numCompactThreads = Integer.valueOf(cmd.getOptionValue("compactthreads", "4"));
+        int numFlushThreads = Integer.valueOf(cmd.getOptionValue("flushthreads", "1"));
+        int bulkLoad = Integer.valueOf(cmd.getOptionValue("bulkload", "0"));
+
+        if (cmd.hasOption("h")) {
+            HelpFormatter formatter = new HelpFormatter();
+            formatter.setWidth(120);
+            formatter.printHelp("RocksCookieTest", options);
+            return;
+        }
+
+        ExecutorService executor = Executors.newFixedThreadPool(numLoadThread);
         final BlockingQueue<Object> queue = new ArrayBlockingQueue<Object>(1000);
         final AtomicBoolean doneFlag = new AtomicBoolean();
         final AtomicInteger completedFiles = new AtomicInteger();
 
-        String dir = "/Users/benziegler/test_data/cookies";
-        if (args.length > 0) {
-            dir = args[0];
-            System.out.println("dir = " + dir);
-        }
-
         List<File> list = new ArrayList<File>();
-        FileRecur.getFilesInDirRecursively(dir, list);
+        FileRecur.getFilesInDirRecursively(loadDir, list);
 
-        Thread thread = new Thread(new PutThread(queue, doneFlag, completedFiles, list.size()));
+        Thread thread = new Thread(new PutThread(queue, doneFlag, completedFiles, list.size(), numCompactThreads, numFlushThreads, bulkLoad));
         thread.start();
 
         for (File oneFile : list) {
