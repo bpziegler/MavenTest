@@ -108,7 +108,7 @@ public class RocksCookieTest implements Runnable {
 
 
     public static void main(String[] args) throws Exception {
-        ExecutorService executor = Executors.newFixedThreadPool(1);
+        ExecutorService executor = Executors.newFixedThreadPool(4);
         final BlockingQueue<Object> queue = new ArrayBlockingQueue<Object>(1000);
         final AtomicBoolean doneFlag = new AtomicBoolean();
         final AtomicInteger completedFiles = new AtomicInteger();

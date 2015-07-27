@@ -5,6 +5,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 import org.rocksdb.WriteBatch;
@@ -42,7 +43,13 @@ public class PutThread implements Runnable {
         long start = System.currentTimeMillis();
 
         RocksDB.loadLibrary();
-        RocksDB db = RocksDB.open("test-db");
+        Options options = new Options();
+        options.prepareForBulkLoad();
+        options.setCreateIfMissing(true);
+//        options.setMaxBackgroundCompactions(4);
+//        options.setMaxBackgroundFlushes(4);
+//        options.setIncreaseParallelism(8);
+        RocksDB db = RocksDB.open(options, "test-db");
 
         WriteBatch writeBatch = new WriteBatch();
         WriteOptions writeOptions = new WriteOptions();
@@ -53,7 +60,7 @@ public class PutThread implements Runnable {
         while (true) {
             Object obj = queue.poll();
             if (obj == null) {
-                if (doneFlag.get())
+                if (doneFlag.get() && queue.size() == 0)    // Note we check the queue size AGAIN for thread safety
                     break;
             } else if (obj instanceof PutKeyValue) {
                 num++;
@@ -64,6 +71,7 @@ public class PutThread implements Runnable {
 
                 if (numBatch % 1000 == 0) {
                     db.write(writeOptions, writeBatch);
+                    writeBatch.dispose();
                     numBatch = 0;
                     writeBatch = new WriteBatch();
                 }
@@ -80,6 +88,9 @@ public class PutThread implements Runnable {
             db.write(writeOptions, writeBatch);
         }
 
+        System.out.println("Major compaction");
+        db.compactRange();
+        System.out.println("Closing");
         db.close();
         dumpStats(num, start);
     }
