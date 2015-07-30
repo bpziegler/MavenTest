@@ -5,6 +5,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.rocksdb.CompactionStyle;
+import org.rocksdb.CompressionType;
 import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
@@ -51,6 +53,8 @@ public class PutThread implements Runnable {
 
         RocksDB.loadLibrary();
         Options options = new Options();
+        options.setCompactionStyle(CompactionStyle.UNIVERSAL);
+        options.setCompressionType(CompressionType.SNAPPY_COMPRESSION);
         options.setCreateIfMissing(true);
         if (bulkLoad != 0) {
             options.prepareForBulkLoad();
