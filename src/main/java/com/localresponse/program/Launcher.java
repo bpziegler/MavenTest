@@ -19,6 +19,7 @@ import com.qualia.cookie.RocksCompact;
 import com.qualia.cookie.RocksCookieScan;
 import com.qualia.cookie.RocksCookieTest;
 import com.qualia.test.RocksTest;
+import com.qualia.util.UniqueLines;
 
 
 public class Launcher {
@@ -40,6 +41,7 @@ public class Launcher {
         register(RocksCookieTest.class);
         register(RocksCookieScan.class);
         register(RocksCompact.class);
+        register(UniqueLines.class);
     }
 
 
