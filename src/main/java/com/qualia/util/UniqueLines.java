@@ -45,17 +45,17 @@ public class UniqueLines {
 			
 			lineNum++;
             if (System.currentTimeMillis() - lastLog >= 250) {
-                lastLog = dumpStats(cs, lineNum, numUnique, startTime);
+                lastLog = dumpStats(cs, lineNum, numUnique, numDup, startTime);
             }			
 		}
 		
-        lastLog = dumpStats(cs, lineNum, numUnique, startTime);
+        lastLog = dumpStats(cs, lineNum, numUnique, numDup, startTime);
 		System.out.println("Done");
 		
 		br.close();
 	}
 
-	private long dumpStats(CountingInputStream cs, long lineNum, long numUnique, long startTime) {
+	private long dumpStats(CountingInputStream cs, long lineNum, long numUnique, long numDup, long startTime) {
 		long lastLog;
 		lastLog = System.currentTimeMillis();
 
@@ -64,10 +64,10 @@ public class UniqueLines {
 		double elapSec = (System.currentTimeMillis() - startTime) / 1000.0;
 		double linesPerSec = (0.0 + lineNum) / elapSec;
 		double uniquePer = (0.0 + numUnique) / lineNum;
-		String extraStatus = String.format("%,12d uniques   %7.1f %%", numUnique, uniquePer*100);
+		String extraStatus = String.format("%,12d uniques   %,12d dups   %10.3f %%", numUnique, numDup, uniquePer*100);
 
 		String status = String.format(
-		        "Line %,12d   Bytes %,12d   Elap %,8.1f   MB %,8d   Line/Sec %,8.0f   %s",
+		        "Line %,12d   Bytes %,14d   Elap %,8.1f   MB %,8d   Line/Sec %,9.0f   %s",
 		        lineNum, curBytes, elapSec, usedMB, linesPerSec,
 		        extraStatus);
 
