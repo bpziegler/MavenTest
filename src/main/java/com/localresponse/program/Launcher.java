@@ -21,6 +21,7 @@ import com.qualia.cookie.RocksCookieScan;
 import com.qualia.cookie.RocksCookieTest;
 import com.qualia.iqscores.SegmentOverlap;
 import com.qualia.test.RocksTest;
+import com.qualia.util.UniqueLines;
 
 
 public class Launcher {
@@ -44,6 +45,7 @@ public class Launcher {
         register(RocksCookieScan.class);
         register(RocksCompact.class);
         register(Neo4jStoreStats.class);
+        register(UniqueLines.class);
     }
 
 
