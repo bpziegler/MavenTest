@@ -62,6 +62,7 @@ public class PutThread implements Runnable {
         options.setIncreaseParallelism(numCompactThreads + numFlushThreads);
         options.setMaxBackgroundCompactions(numCompactThreads);
         options.setMaxBackgroundFlushes(numFlushThreads);
+        options.setWriteBufferSize(2 * 1024 * 1024);
         RocksDB db = RocksDB.open(options, "test-db");
 
         WriteBatch writeBatch = new WriteBatch();

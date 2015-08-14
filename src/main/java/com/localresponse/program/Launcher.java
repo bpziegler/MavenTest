@@ -9,6 +9,7 @@ import java.util.List;
 import com.localresponse.misc.ExtractCookieLines;
 import com.localresponse.neo4j_tool.GraphCompactor;
 import com.localresponse.neo4j_tool.GraphUniquePropertyChecker;
+import com.localresponse.neo4j_tool.Neo4jStoreStats;
 import com.localresponse.tapad.CheckUnique;
 import com.localresponse.tapad.LargeLines;
 import com.localresponse.tapad.TapadPartition;
@@ -18,6 +19,7 @@ import com.qualia.bluecava.BlueCavaStats;
 import com.qualia.cookie.RocksCompact;
 import com.qualia.cookie.RocksCookieScan;
 import com.qualia.cookie.RocksCookieTest;
+import com.qualia.iqscores.SegmentOverlap;
 import com.qualia.test.RocksTest;
 
 
@@ -36,10 +38,12 @@ public class Launcher {
         register(TapadUniqueLineAnalyzer.class);
         register(BlueCavaStats.class);
         register(GraphUniquePropertyChecker.class);
+        register(SegmentOverlap.class);
         register(RocksTest.class);
         register(RocksCookieTest.class);
         register(RocksCookieScan.class);
         register(RocksCompact.class);
+        register(Neo4jStoreStats.class);
     }
 
 
