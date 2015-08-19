@@ -51,7 +51,7 @@ public class NodeStoreDump {
         System.out.println("store.getRecordSize() = " + size);
         long startTime = System.currentTimeMillis();
         long maxId = store.getHighestPossibleIdInUse();
-        for (long i = 1; i <= maxId; i++) {
+        for (long i = 0; i <= maxId; i++) {
             NodeRecord record = store.forceGetRecord(i);
             if (record.inUse()) {
                 used++;

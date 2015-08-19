@@ -32,7 +32,7 @@ public class RelationshipStoreDump {
 
 
     private void dump(String dir) throws IOException {
-        File storeFile = new File(dir, "neostore.nodestore.db");
+        File storeFile = new File(dir, "neostore.relationshipstore.db");
         File labelFile = new File(dir, "neostore.relationshiptypestore.db");
 
         typeMap = RelationshipTypeDumper.getTypeMap(labelFile);
@@ -49,7 +49,7 @@ public class RelationshipStoreDump {
         System.out.println("store.getRecordSize() = " + size);
         long startTime = System.currentTimeMillis();
         long maxId = store.getHighestPossibleIdInUse();
-        for (long i = 1; i <= maxId; i++) {
+        for (long i = 0; i <= maxId; i++) {
             RelationshipRecord record = store.forceGetRecord(i);
             if (record.inUse()) {
                 used++;
