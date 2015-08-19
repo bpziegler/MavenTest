@@ -117,7 +117,7 @@ public class PropertyStoreDump {
         long usedMB = (runtime.totalMemory() - runtime.freeMemory()) / MB;
 
         String status = String.format(
-                "Node %,12d   Elap %,8.1f   Remain %8s   %7.3f %%   MB %,8d   Line/Sec %,8.0f   Used %,12d", cur, elap,
+                "Property %,12d   Elap %,8.1f   Remain %8s   %7.3f %%   MB %,8d   Line/Sec %,8.0f   Used %,12d", cur, elap,
                 durStr, 100.0 * cur / maxId, usedMB, curRate, used);
 
         System.out.println(status);
