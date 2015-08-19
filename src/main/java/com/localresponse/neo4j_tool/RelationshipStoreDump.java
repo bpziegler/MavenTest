@@ -14,45 +14,43 @@ import org.neo4j.kernel.DefaultFileSystemAbstraction;
 import org.neo4j.kernel.DefaultIdGeneratorFactory;
 import org.neo4j.kernel.configuration.Config;
 import org.neo4j.kernel.impl.nioneo.store.DefaultWindowPoolFactory;
-import org.neo4j.kernel.impl.nioneo.store.LabelDumper;
-import org.neo4j.kernel.impl.nioneo.store.NodeRecord;
-import org.neo4j.kernel.impl.nioneo.store.NodeStore;
+import org.neo4j.kernel.impl.nioneo.store.RelationshipRecord;
+import org.neo4j.kernel.impl.nioneo.store.RelationshipStore;
+import org.neo4j.kernel.impl.nioneo.store.RelationshipTypeDumper;
 import org.neo4j.kernel.impl.nioneo.store.StoreFactory;
-import org.neo4j.kernel.impl.nioneo.store.labels.NodeLabels;
-import org.neo4j.kernel.impl.nioneo.store.labels.NodeLabelsField;
 import org.neo4j.kernel.impl.util.StringLogger;
 
 
-public class NodeStoreDump {
+public class RelationshipStoreDump {
 
     private final int MB = 1024 * 1024;
     private final Runtime runtime = Runtime.getRuntime();
 
     private long lastLog = 0;
     private long used = 0;
-    private Map<Integer, String> labelMap;
+    private Map<Integer, String> typeMap;
 
 
-    public void dump(String dir) throws IOException {
+    private void dump(String dir) throws IOException {
         File storeFile = new File(dir, "neostore.nodestore.db");
-        File labelFile = new File(dir, "neostore.labeltokenstore.db");
+        File labelFile = new File(dir, "neostore.relationshiptypestore.db");
 
-        labelMap = LabelDumper.getLabelMap(labelFile);
-        System.out.println("labelMap = " + labelMap.toString());
+        typeMap = RelationshipTypeDumper.getTypeMap(labelFile);
+        System.out.println("typeMap = " + typeMap.toString());
 
         StoreFactory storeFactory = new StoreFactory(new Config(), new DefaultIdGeneratorFactory(),
                 new DefaultWindowPoolFactory(), new DefaultFileSystemAbstraction(), StringLogger.SYSTEM, null);
-        NodeStore store = storeFactory.newNodeStore(storeFile);
+        RelationshipStore store = storeFactory.newRelationshipStore(storeFile);
         store.makeStoreOk();
         int size = store.getRecordSize();
 
-        BufferedWriter bw = createFile("nodes.txt");
+        BufferedWriter bw = createFile("relationships.txt");
 
         System.out.println("store.getRecordSize() = " + size);
         long startTime = System.currentTimeMillis();
         long maxId = store.getHighestPossibleIdInUse();
         for (long i = 1; i <= maxId; i++) {
-            NodeRecord record = store.forceGetRecord(i);
+            RelationshipRecord record = store.forceGetRecord(i);
             if (record.inUse()) {
                 used++;
                 dumpRecord(bw, store, record);
@@ -72,11 +70,12 @@ public class NodeStoreDump {
     }
 
 
-    private void dumpRecord(BufferedWriter bw, NodeStore store, NodeRecord record) throws IOException {
-        NodeLabels labels = NodeLabelsField.parseLabelsField(record);
-        long[] labelIds = labels.getIfLoaded();
-        String label = labelMap.get((int) labelIds[0]);
-        String line = String.format("%d,%s\n", record.getId(), label);
+    private void dumpRecord(BufferedWriter bw, RelationshipStore store, RelationshipRecord record) throws IOException {
+        long node1 = record.getFirstNode();
+        long node2 = record.getSecondNode();
+        long type = record.getType();
+        String typeStr = typeMap.get((int) type);
+        String line = String.format("%d,%d,%s\n", node1, node2, typeStr);
         bw.write(line);
     }
 
@@ -97,7 +96,7 @@ public class NodeStoreDump {
         long usedMB = (runtime.totalMemory() - runtime.freeMemory()) / MB;
 
         String status = String.format(
-                "Node %,12d   Elap %,8.1f   Remain %8s   %7.3f %%   MB %,8d   Line/Sec %,8.0f   Used %,12d", cur, elap,
+                "Relationship %,12d   Elap %,8.1f   Remain %8s   %7.3f %%   MB %,8d   Line/Sec %,8.0f   Used %,12d", cur, elap,
                 durStr, 100.0 * cur / maxId, usedMB, curRate, used);
 
         System.out.println(status);
@@ -105,14 +104,15 @@ public class NodeStoreDump {
     }
 
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         String dir = "//Users/benziegler/work/neo4j-community-2.1.8/data/graph.db";
         if (args.length > 0) {
             dir = args[0];
         }
         System.out.println("graph dir = " + dir);
 
-        NodeStoreDump program = new NodeStoreDump();
+        RelationshipStoreDump program = new RelationshipStoreDump();
         program.dump(dir);
     }
+
 }

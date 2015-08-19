@@ -12,3 +12,4 @@
 .DS_Store
 /dest-graph/
 /nodes.txt
+/relationships.txt
