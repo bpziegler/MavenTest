@@ -10,6 +10,7 @@ import com.localresponse.misc.ExtractCookieLines;
 import com.localresponse.neo4j_tool.GraphCompactor;
 import com.localresponse.neo4j_tool.GraphUniquePropertyChecker;
 import com.localresponse.neo4j_tool.Neo4jStoreStats;
+import com.localresponse.neo4j_tool.NodeStoreDump;
 import com.localresponse.tapad.CheckUnique;
 import com.localresponse.tapad.LargeLines;
 import com.localresponse.tapad.TapadPartition;
@@ -45,6 +46,7 @@ public class Launcher {
         register(RocksCookieScan.class);
         register(RocksCompact.class);
         register(Neo4jStoreStats.class);
+        register(NodeStoreDump.class);
         register(UniqueLines.class);
     }
 

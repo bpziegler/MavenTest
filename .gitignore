@@ -10,3 +10,5 @@
 /cond_counts.json
 /test-db/
 .DS_Store
+/dest-graph/
+/nodes.txt
