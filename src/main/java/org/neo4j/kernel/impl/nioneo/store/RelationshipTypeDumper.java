@@ -35,6 +35,8 @@ public class RelationshipTypeDumper {
             }
         }
 
+        store.close();
+
         return map;
     }
 

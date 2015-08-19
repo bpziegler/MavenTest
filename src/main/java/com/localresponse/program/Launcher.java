@@ -11,6 +11,7 @@ import com.localresponse.neo4j_tool.GraphCompactor;
 import com.localresponse.neo4j_tool.GraphUniquePropertyChecker;
 import com.localresponse.neo4j_tool.Neo4jStoreStats;
 import com.localresponse.neo4j_tool.NodeStoreDump;
+import com.localresponse.neo4j_tool.PropertyStoreDump;
 import com.localresponse.neo4j_tool.RelationshipStoreDump;
 import com.localresponse.tapad.CheckUnique;
 import com.localresponse.tapad.LargeLines;
@@ -50,6 +51,7 @@ public class Launcher {
         register(NodeStoreDump.class);
         register(UniqueLines.class);
         register(RelationshipStoreDump.class);
+        register(PropertyStoreDump.class);
     }
 
 
