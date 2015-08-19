@@ -76,7 +76,7 @@ public class NodeStoreDump {
         NodeLabels labels = NodeLabelsField.parseLabelsField(record);
         long[] labelIds = labels.getIfLoaded();
         String label = labelMap.get((int) labelIds[0]);
-        String line = String.format("%d,%s\n", record.getId(), label);
+        String line = String.format("%d,%s,%d\n", record.getId(), label, record.getNextProp());
         bw.write(line);
     }
 

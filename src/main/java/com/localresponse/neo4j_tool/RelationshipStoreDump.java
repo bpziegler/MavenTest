@@ -75,7 +75,7 @@ public class RelationshipStoreDump {
         long node2 = record.getSecondNode();
         long type = record.getType();
         String typeStr = typeMap.get((int) type);
-        String line = String.format("%d,%d,%d,%s\n", record.getId(), node1, node2, typeStr);
+        String line = String.format("%d,%d,%d,%s,%d\n", record.getId(), node1, node2, typeStr, record.getNextProp());
         bw.write(line);
     }
 
