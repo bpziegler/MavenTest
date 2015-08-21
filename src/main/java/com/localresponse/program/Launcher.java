@@ -22,6 +22,7 @@ import com.qualia.bluecava.BlueCavaStats;
 import com.qualia.cookie.RocksCompact;
 import com.qualia.cookie.RocksCookieScan;
 import com.qualia.cookie.RocksCookieTest;
+import com.qualia.hbase.AddThisMappingLoader;
 import com.qualia.iqscores.SegmentOverlap;
 import com.qualia.test.RocksTest;
 import com.qualia.util.UniqueLines;
@@ -52,6 +53,7 @@ public class Launcher {
         register(UniqueLines.class);
         register(RelationshipStoreDump.class);
         register(PropertyStoreDump.class);
+        register(AddThisMappingLoader.class);
     }
 
 
