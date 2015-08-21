@@ -2,12 +2,22 @@ package com.qualia.hbase;
 
 
 import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
+import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.thrift.generated.BatchMutation;
 import org.apache.hadoop.hbase.thrift.generated.Hbase;
 import org.apache.hadoop.hbase.thrift.generated.Hbase.Client;
@@ -33,12 +43,40 @@ public class AddThisMappingLoader {
     private Splitter equalSplitter = Splitter.on("=");
     private HashMap<String, String> pidCodes = new HashMap<String, String>();
     private HashMap<String, ArrayList<BatchMutation>> tableToBatchMap = new HashMap<String, ArrayList<BatchMutation>>();
+    private TableBatch propsBatch;
+    private TableBatch mappingBatch;
+
+    private static class TableBatch {
+        private final Table table;
+        private final ArrayList<Put> puts = new ArrayList<>();
+
+
+        public TableBatch(Table table) {
+            this.table = table;
+        }
+
+
+        public void put(byte[] row, byte[] family, byte[] col, byte[] value) {
+            Put put = new Put(row);
+            put.addColumn(family, col, value);
+            puts.add(put);
+        }
+
+
+        public void flush(int minSize) throws IOException, InterruptedException {
+            if (puts.size() >= minSize) {
+                Object[] results = new Object[puts.size()];
+                table.batch(puts, results);
+                puts.clear();
+            }
+        }
+    }
 
 
     // Helper to translate strings to UTF8 bytes
-    private static ByteBuffer bytes(String s) {
+    private static byte[] bytes(String s) {
         try {
-            return ByteBuffer.wrap(s.getBytes("UTF-8"));
+            return s.getBytes("UTF-8");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
             return null;
@@ -75,22 +113,23 @@ public class AddThisMappingLoader {
             }
         });
 
-        for (String tableName : tableToBatchMap.keySet()) {
-            ArrayList<BatchMutation> batchMutations = tableToBatchMap.get(tableName);
-            if (batchMutations.size() >= 1) {
-                flushBatch(tableName, batchMutations);
-            }
-        }
+        propsBatch.flush(1);
+        mappingBatch.flush(1);
 
         transport.close();
     }
 
 
-    private void initTransport() throws TTransportException {
-        transport = new TSocket("localhost", 9090);
-        TBinaryProtocol protocol = new TBinaryProtocol(transport, true, true);
-        client = new Hbase.Client(protocol);
-        transport.open();
+    private void initTransport() throws TTransportException, IOException {
+        Configuration config = HBaseConfiguration.create();
+        config.set("hbase.zookeeper.quorum", "localhost");
+
+        Connection connection = ConnectionFactory.createConnection(config);
+        Table propsTable = connection.getTable(TableName.valueOf("props"));
+        Table mappingTable = connection.getTable(TableName.valueOf("mapping"));
+
+        propsBatch = new TableBatch(propsTable);
+        mappingBatch = new TableBatch(mappingTable);
     }
 
 
@@ -104,7 +143,10 @@ public class AddThisMappingLoader {
         String pidUidPairsList = parts.get(2);
         List<String> pidUidPairs = commaSplitter.splitToList(pidUidPairsList);
         String lrDeviceKey = "pu_" + "lr_" + lr_uid;
-        setKeyValBatch("props", lrDeviceKey, "f1:last_seen", dtStr);
+        setKeyValBatch(propsBatch, lrDeviceKey, "f1", "last_seen", dtStr);
+
+        ArrayList<String> mappings = new ArrayList<String>();
+        mappings.add(lrDeviceKey);
         for (String pidUidPair : pidUidPairs) {
             List<String> pidUidParts = equalSplitter.splitToList(pidUidPair);
             String pidCode = pidUidParts.get(0);
@@ -115,52 +157,25 @@ public class AddThisMappingLoader {
             }
 
             String mappedDeviceKey = "pu_" + pid + "_" + uid;
-            setKeyValBatch("props", mappedDeviceKey, "f1:last_seen", dtStr);
-
-            setKeyValBatch("mapping", lrDeviceKey, "f1:" + mappedDeviceKey, "");
-            setKeyValBatch("mapping", mappedDeviceKey, "f1:" + lrDeviceKey, "");
+            setKeyValBatch(propsBatch, mappedDeviceKey, "f1", "last_seen", dtStr);
+            mappings.add(mappedDeviceKey);
         }
 
-    }
-
-
-    private void setKeyValBatch(String tableName, String rowKey, String colName, String colValue) {
-        Mutation mutation = new Mutation(false, bytes(colName), bytes(colValue), false);
-        ArrayList<Mutation> mutationList = new ArrayList<Mutation>();
-        mutationList.add(mutation);
-        BatchMutation batchMutation = new BatchMutation(bytes(rowKey), mutationList);
-
-        ArrayList<BatchMutation> batchMutations = tableToBatchMap.get(tableName);
-        if (batchMutations == null) {
-            batchMutations = new ArrayList<BatchMutation>();
-            tableToBatchMap.put(tableName, batchMutations);
-        }
-        batchMutations.add(batchMutation);
-
-        if (batchMutations.size() >= 1000) {
-            flushBatch(tableName, batchMutations);
+        // We want to spread out the distribution of "fat" rows (the one used first), to help partioning
+        Collections.shuffle(mappings);
+        String src = mappings.get(0);
+        for (int i = 1; i < mappings.size(); i++) {
+            String dest = mappings.get(i);
+            setKeyValBatch(mappingBatch, src, "f1", dest, "");
+            setKeyValBatch(mappingBatch, dest, "f1", src, "");
         }
     }
 
 
-    private void flushBatch(String tableName, ArrayList<BatchMutation> batchMutations) {
-        int numTry = 0;
-
-        while (true) {
-            try {
-                client.mutateRows(bytes(tableName), batchMutations, null);
-                batchMutations.clear();
-                break;
-            } catch (Exception e) {
-                numTry++;
-                System.out.println("NumTry = " + numTry + "   Exception:  " + e.getMessage());
-                try {
-                    Thread.sleep(numTry * 5);
-                    initTransport();
-                } catch (Exception e1) {
-                }
-            }
-        }
+    private void setKeyValBatch(TableBatch batch, String rowKey, String family, String colName, String colValue)
+            throws IOException, InterruptedException {
+        batch.put(bytes(rowKey), bytes(family), bytes(colName), bytes(colValue));
+        batch.flush(1000);
     }
 
 
