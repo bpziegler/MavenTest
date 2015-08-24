@@ -4,7 +4,6 @@ package com.qualia.hbase;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,17 +14,8 @@ import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
-import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Table;
-import org.apache.hadoop.hbase.thrift.generated.BatchMutation;
-import org.apache.hadoop.hbase.thrift.generated.Hbase;
-import org.apache.hadoop.hbase.thrift.generated.Hbase.Client;
-import org.apache.hadoop.hbase.thrift.generated.Mutation;
-import org.apache.thrift.protocol.TBinaryProtocol;
-import org.apache.thrift.transport.TSocket;
-import org.apache.thrift.transport.TTransportException;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Splitter;
@@ -35,14 +25,10 @@ import com.qualia.util.MultiFileLineProcessor;
 
 public class AddThisMappingLoader {
 
-    private TSocket transport;
-    private Client client;
-    private ObjectMapper mapper = new ObjectMapper();
     private Splitter tabSplitter = Splitter.on("\t");
     private Splitter commaSplitter = Splitter.on(",");
     private Splitter equalSplitter = Splitter.on("=");
     private HashMap<String, String> pidCodes = new HashMap<String, String>();
-    private HashMap<String, ArrayList<BatchMutation>> tableToBatchMap = new HashMap<String, ArrayList<BatchMutation>>();
     private TableBatch propsBatch;
     private TableBatch mappingBatch;
 
@@ -115,12 +101,10 @@ public class AddThisMappingLoader {
 
         propsBatch.flush(1);
         mappingBatch.flush(1);
-
-        transport.close();
     }
 
 
-    private void initTransport() throws TTransportException, IOException {
+    private void initTransport() throws IOException {
         Configuration config = HBaseConfiguration.create();
         config.set("hbase.zookeeper.quorum", "localhost");
 
