@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.neo4j.kernel.impl.nioneo.store.PropertyKeyDumper;
+
 import com.localresponse.misc.ExtractCookieLines;
 import com.localresponse.neo4j_tool.GraphCompactor;
 import com.localresponse.neo4j_tool.GraphUniquePropertyChecker;
@@ -54,6 +56,7 @@ public class Launcher {
         register(RelationshipStoreDump.class);
         register(PropertyStoreDump.class);
         register(AddThisMappingLoader.class);
+        register(PropertyKeyDumper.class);
     }
 
 

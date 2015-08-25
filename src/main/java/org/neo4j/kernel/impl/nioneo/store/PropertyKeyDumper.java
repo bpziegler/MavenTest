@@ -1,5 +1,6 @@
 package org.neo4j.kernel.impl.nioneo.store;
 
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,6 +9,7 @@ import org.neo4j.kernel.DefaultFileSystemAbstraction;
 import org.neo4j.kernel.DefaultIdGeneratorFactory;
 import org.neo4j.kernel.configuration.Config;
 import org.neo4j.kernel.impl.util.StringLogger;
+
 
 public class PropertyKeyDumper {
 
@@ -30,7 +32,7 @@ public class PropertyKeyDumper {
                 map.put(record.getId(), str);
             }
         }
-        
+
         store.close();
 
         return map;
@@ -39,10 +41,13 @@ public class PropertyKeyDumper {
 
     public static void main(String[] args) {
         String dir = "/Users/benziegler/work/neo4j-community-2.1.8/data/graph.db";
+        if (args.length > 0) {
+            dir = args[0];
+        }
+
         File file = new File(dir, "neostore.propertystore.db.index");
         Map<Integer, String> result = PropertyKeyDumper.getPropertyKeyMap(file);
         System.out.println("PropertyKeys = " + result.toString());
     }
-
 
 }
