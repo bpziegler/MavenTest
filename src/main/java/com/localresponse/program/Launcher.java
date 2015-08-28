@@ -21,7 +21,6 @@ import com.localresponse.tapad.TapadPartition;
 import com.localresponse.tapad_load.TapadLoader;
 import com.localresponse.tapad_util.TapadUniqueLineAnalyzer;
 import com.qualia.bluecava.BlueCavaStats;
-import com.qualia.cookie.RocksCompact;
 import com.qualia.cookie.RocksCookieScan;
 import com.qualia.cookie.RocksCookieTest;
 import com.qualia.hbase.AddThisMappingLoader;
@@ -53,7 +52,6 @@ public class Launcher {
         register(RocksTest.class);
         register(RocksCookieTest.class);
         register(RocksCookieScan.class);
-        register(RocksCompact.class);
         register(Neo4jStoreStats.class);
         register(NodeStoreDump.class);
         register(UniqueLines.class);

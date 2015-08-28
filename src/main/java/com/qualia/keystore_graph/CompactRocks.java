@@ -1,9 +1,6 @@
 package com.qualia.keystore_graph;
 
 
-import org.rocksdb.CompactionStyle;
-import org.rocksdb.CompressionType;
-import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 
@@ -18,17 +15,20 @@ public class CompactRocks {
             path = "test-db";
         }
 
-        Options options = new Options();
-        options.setCompactionStyle(CompactionStyle.UNIVERSAL);
-        options.setCompressionType(CompressionType.SNAPPY_COMPRESSION);
-        options.setIncreaseParallelism(4);
-        options.setMaxBackgroundCompactions(2);
-        options.setMaxBackgroundFlushes(2);
-        options.setWriteBufferSize(64 * 1024 * 1024);
+        boolean compress = false;
+        if (args.length > 1) {
+            compress = true;
+        }
+
         System.out.println("Opening RocksDB = " + path);
-        RocksDB db = RocksDB.open(options, path);
+        RocksDB db = RocksDB.open(KeyStoreTable.getDefaultOptions(compress), path);
         System.out.println("Compacting");
         db.compactRange();
+
+        System.out.println("Closing");
+        db.close();
+        db.dispose();
+
         System.out.println("done");
     }
 

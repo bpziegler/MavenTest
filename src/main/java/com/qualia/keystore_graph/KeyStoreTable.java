@@ -33,26 +33,19 @@ public class KeyStoreTable {
         this.compress = compress;
         File dir = new File("test-db", tableName);
         try {
-            initDb(dir.getAbsolutePath(), readOnly);
+            initDb(dir.getAbsolutePath(), compress, readOnly);
         } catch (RocksDBException e) {
             throw new RuntimeException(e);
         }
     }
 
 
-    public void initDb(String path, boolean readOnly) throws RocksDBException {
+    public void initDb(String path, boolean compress, boolean readOnly) throws RocksDBException {
         RocksDB.loadLibrary();
         if (readOnly) {
             db = RocksDB.openReadOnly(path);
         } else {
-            Options options = new Options();
-            options.setCompactionStyle(CompactionStyle.UNIVERSAL);
-            options.setCompressionType(CompressionType.SNAPPY_COMPRESSION);
-            options.setCreateIfMissing(true);
-            options.setIncreaseParallelism(4);
-            options.setMaxBackgroundCompactions(2);
-            options.setMaxBackgroundFlushes(2);
-            options.setWriteBufferSize(64 * 1024 * 1024);
+            Options options = getDefaultOptions(compress);
             db = RocksDB.open(options, path);
         }
 
@@ -61,6 +54,21 @@ public class KeyStoreTable {
         writeOptions.setDisableWAL(true);
 
         writeBatch = new WriteBatch();
+    }
+
+
+    public static Options getDefaultOptions(boolean compress) {
+        Options options = new Options();
+        options.setCompactionStyle(CompactionStyle.UNIVERSAL);
+        if (compress) {
+            options.setCompressionType(CompressionType.SNAPPY_COMPRESSION);
+        }
+        options.setCreateIfMissing(true);
+        options.setIncreaseParallelism(4);
+        options.setMaxBackgroundCompactions(2);
+        options.setMaxBackgroundFlushes(2);
+        options.setWriteBufferSize(8 * 1024 * 1024);
+        return options;
     }
 
 
