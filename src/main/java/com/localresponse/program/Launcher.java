@@ -26,6 +26,7 @@ import com.qualia.cookie.RocksCookieScan;
 import com.qualia.cookie.RocksCookieTest;
 import com.qualia.hbase.AddThisMappingLoader;
 import com.qualia.iqscores.SegmentOverlap;
+import com.qualia.keystore_graph.CompactRocks;
 import com.qualia.keystore_graph.GraphStorageTest;
 import com.qualia.keystore_graph.KeyStoreAddThisMappingLoader;
 import com.qualia.test.JettyTest;
@@ -63,6 +64,7 @@ public class Launcher {
         register(JettyTest.class);
         register(KeyStoreAddThisMappingLoader.class);
         register(GraphStorageTest.class);
+        register(CompactRocks.class);
     }
 
 
@@ -79,7 +81,9 @@ public class Launcher {
 
         for (Class<? extends Object> oneProgramClass : registeredProgramClasses) {
             String progName = oneProgramClass.getSimpleName();
-            System.out.println(progName);
+            if (args.length == 0) {
+                System.out.println(progName);
+            }
 
             if (progName.equals(runClassName) || (registeredProgramClasses.size() == 1)) {
                 runClass = oneProgramClass;

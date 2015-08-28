@@ -49,10 +49,10 @@ public class KeyStoreTable {
             options.setCompactionStyle(CompactionStyle.UNIVERSAL);
             options.setCompressionType(CompressionType.SNAPPY_COMPRESSION);
             options.setCreateIfMissing(true);
-            options.setIncreaseParallelism(2);
-            options.setMaxBackgroundCompactions(1);
-            options.setMaxBackgroundFlushes(1);
-            options.setWriteBufferSize(2 * 1024 * 1024);
+            options.setIncreaseParallelism(4);
+            options.setMaxBackgroundCompactions(2);
+            options.setMaxBackgroundFlushes(2);
+            options.setWriteBufferSize(64 * 1024 * 1024);
             db = RocksDB.open(options, path);
         }
 
