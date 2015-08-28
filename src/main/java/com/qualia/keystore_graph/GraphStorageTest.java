@@ -26,6 +26,8 @@ public class GraphStorageTest {
             pid_uids.add(pid_uid);
         }
 
+        long startTime = System.currentTimeMillis();
+        long lastLog = 0;
         GraphStorage storage = new GraphStorage(true);
         int num = 0;
         for (String pid_uid : pid_uids) {
@@ -35,9 +37,13 @@ public class GraphStorageTest {
             GlobalKey rootKey = GlobalKey.createFromPidUid(pid, uid);
             Collection<GlobalKey> keys = storage.getAllMappings(rootKey);
 
-            if (num % 100 == 0) {
-                System.out.println("Num = " + num + "   " + keys.toString());
+            long now = System.currentTimeMillis();
+            if (now - lastLog >= 250) {
+                lastLog = now;
+                double elap = (0.0 + now - startTime) / 1000.0;
+                System.out.println(String.format("Elap %,8.1f   Num = %,8d   %3d   %s", elap, num, keys.size(), keys.iterator().next()));
             }
+
             num++;
         }
 

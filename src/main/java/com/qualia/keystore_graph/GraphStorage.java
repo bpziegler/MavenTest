@@ -18,6 +18,8 @@ import com.google.common.base.Charsets;
 
 public class GraphStorage {
 
+    private static final int MAX_MAPPINGS_PER_KEY = 32;
+
     private final KeyStoreTable mappingTable;
     private final KeyStoreTable propertyTable;
     private final KeyStoreTable hashLookupTable;
@@ -66,7 +68,7 @@ public class GraphStorage {
 
         while (unFollowedKeys.size() > 0) {
             GlobalKey srcKey = unFollowedKeys.iterator().next();
-            List<GlobalKey> directMappings = getDirectMappings(srcKey);
+            List<GlobalKey> directMappings = getDirectMappings(srcKey, MAX_MAPPINGS_PER_KEY);
             unFollowedKeys.remove(srcKey);
             followedKeys.add(srcKey);
             for (GlobalKey foundKey : directMappings) {
@@ -74,21 +76,31 @@ public class GraphStorage {
                     unFollowedKeys.add(foundKey);
                 }
             }
+            if (followedKeys.size() >= MAX_MAPPINGS_PER_KEY) {
+                break;
+            }
         }
 
         return followedKeys;
     }
 
 
-    private List<GlobalKey> getDirectMappings(final GlobalKey srcKey) {
+    private List<GlobalKey> getDirectMappings(final GlobalKey srcKey, final int maxMappings) {
         final List<GlobalKey> result = new ArrayList<GlobalKey>();
         final byte[] srcHash = srcKey.getHashValue();
 
         // Scan where the srcKey bytes match the first bytes from the scan key.
         // Key of the Mapping table is [src.bytes][dest.bytes]
         mappingTable.scan(srcHash, new IScanCallback() {
+            int num = 0;
+
+
             @Override
             public boolean onRow(byte[] key, byte[] value) {
+                num++;
+                if (num >= maxMappings) {
+                    return false;
+                }
                 boolean keyMatches = true;
                 for (int i = 0; i < srcHash.length; i++) {
                     if (srcHash[i] != key[i]) {
