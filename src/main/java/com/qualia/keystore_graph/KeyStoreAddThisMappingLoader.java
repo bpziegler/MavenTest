@@ -71,7 +71,7 @@ public class KeyStoreAddThisMappingLoader extends FileLoader {
 
 
     public static void main(String[] args) throws Exception {
-        GraphStorage storage = new GraphStorage();
+        GraphStorage storage = new GraphStorage(false);
         KeyStoreAddThisMappingLoader loader = new KeyStoreAddThisMappingLoader(storage);
         String path = (args.length > 0) ? args[0] : null;
         if (path == null) {

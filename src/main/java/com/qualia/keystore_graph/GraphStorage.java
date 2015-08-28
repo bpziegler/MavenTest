@@ -18,14 +18,17 @@ import com.google.common.base.Charsets;
 
 public class GraphStorage {
 
-    private final KeyStoreTable mappingTable = new KeyStoreTable("mapping", false);
-    private final KeyStoreTable propertyTable = new KeyStoreTable("property", true);
-    private final KeyStoreTable hashLookupTable = new KeyStoreTable("hash_lookup", true);
-    private final KeyStoreTable ipMappingTable = new KeyStoreTable("ip_mapping", true);
+    private final KeyStoreTable mappingTable;
+    private final KeyStoreTable propertyTable;
+    private final KeyStoreTable hashLookupTable;
+    private final KeyStoreTable ipMappingTable;
 
 
-    public GraphStorage() {
-
+    public GraphStorage(boolean readOnly) {
+        mappingTable = new KeyStoreTable("mapping", false, readOnly);
+        propertyTable = new KeyStoreTable("property", true, readOnly);
+        hashLookupTable = new KeyStoreTable("hash_lookup", true, readOnly);
+        ipMappingTable = new KeyStoreTable("ip_mapping", true, readOnly);
     }
 
 

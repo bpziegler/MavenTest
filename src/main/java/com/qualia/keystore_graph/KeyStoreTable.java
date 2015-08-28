@@ -28,28 +28,32 @@ public class KeyStoreTable {
     private int numBatch = 0;
 
 
-    public KeyStoreTable(String tableName, boolean compress) {
+    public KeyStoreTable(String tableName, boolean compress, boolean readOnly) {
         this.tableName = tableName;
         this.compress = compress;
         File dir = new File("test-db", tableName);
-        initDb(dir.getAbsolutePath());
+        try {
+            initDb(dir.getAbsolutePath(), readOnly);
+        } catch (RocksDBException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
-    public void initDb(String path) {
+    public void initDb(String path, boolean readOnly) throws RocksDBException {
         RocksDB.loadLibrary();
-        Options options = new Options();
-        options.setCompactionStyle(CompactionStyle.UNIVERSAL);
-        options.setCompressionType(CompressionType.SNAPPY_COMPRESSION);
-        options.setCreateIfMissing(true);
-        options.setIncreaseParallelism(2);
-        options.setMaxBackgroundCompactions(1);
-        options.setMaxBackgroundFlushes(1);
-        options.setWriteBufferSize(2 * 1024 * 1024);
-        try {
+        if (readOnly) {
+            db = RocksDB.openReadOnly(path);
+        } else {
+            Options options = new Options();
+            options.setCompactionStyle(CompactionStyle.UNIVERSAL);
+            options.setCompressionType(CompressionType.SNAPPY_COMPRESSION);
+            options.setCreateIfMissing(true);
+            options.setIncreaseParallelism(2);
+            options.setMaxBackgroundCompactions(1);
+            options.setMaxBackgroundFlushes(1);
+            options.setWriteBufferSize(2 * 1024 * 1024);
             db = RocksDB.open(options, path);
-        } catch (RocksDBException e) {
-            throw new RuntimeException(e);
         }
 
         writeOptions = new WriteOptions();
