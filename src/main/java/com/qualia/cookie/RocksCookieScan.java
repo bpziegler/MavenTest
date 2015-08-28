@@ -43,7 +43,9 @@ public class RocksCookieScan {
             byte[] val = iter.value();
             String keyStr = new String(key);
             String valStr = new String(val);
-            countMap.updateCount(valStr);
+            if (keyStr.startsWith("adnxs")) {
+                countMap.updateCount(valStr);
+            }
 
             if ((num % 1000 == 0) && (System.currentTimeMillis() - lastLog >= 100)) {
                 lastLog = dumpStats(start, num, keyStr, valStr);

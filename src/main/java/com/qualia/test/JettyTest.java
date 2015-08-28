@@ -22,14 +22,16 @@ public class JettyTest extends AbstractHandler {
         response.setContentType("text/html;charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
         baseRequest.setHandled(true);
-        response.getWriter().println("<h1>Hello World</h1>");
         int value = counter.incrementAndGet();
-        System.out.println("Received request:  " + value);
+        response.getWriter().println("<h1>Hello World</h1> " + value);
+        if (value % 100 == 0) {
+            System.out.println("Received request:  " + value);
+        }
     }
 
 
     public static void main(String[] args) throws Exception {
-        Server server = new Server(8080);
+        Server server = new Server(8180);
         server.setHandler(new JettyTest());
         server.start();
         server.join();

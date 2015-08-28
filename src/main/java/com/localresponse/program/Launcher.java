@@ -26,6 +26,8 @@ import com.qualia.cookie.RocksCookieScan;
 import com.qualia.cookie.RocksCookieTest;
 import com.qualia.hbase.AddThisMappingLoader;
 import com.qualia.iqscores.SegmentOverlap;
+import com.qualia.keystore_graph.KeyStoreAddThisMappingLoader;
+import com.qualia.test.JettyTest;
 import com.qualia.test.RocksTest;
 import com.qualia.util.UniqueLines;
 
@@ -57,6 +59,8 @@ public class Launcher {
         register(PropertyStoreDump.class);
         register(AddThisMappingLoader.class);
         register(PropertyKeyDumper.class);
+        register(JettyTest.class);
+        register(KeyStoreAddThisMappingLoader.class);
     }
 
 
