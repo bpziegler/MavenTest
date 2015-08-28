@@ -20,8 +20,6 @@ import com.google.common.base.Preconditions;
 
 
 public class KeyStoreTable {
-    private final String tableName;
-    private final boolean compress;
     private RocksDB db;
     private WriteBatch writeBatch;
     private WriteOptions writeOptions;
@@ -29,8 +27,6 @@ public class KeyStoreTable {
 
 
     public KeyStoreTable(String tableName, boolean compress, boolean readOnly) {
-        this.tableName = tableName;
-        this.compress = compress;
         File dir = new File("test-db", tableName);
         try {
             initDb(dir.getAbsolutePath(), compress, readOnly);
