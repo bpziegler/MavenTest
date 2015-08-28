@@ -11,6 +11,7 @@ import org.rocksdb.CompressionType;
 import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
+import org.rocksdb.RocksIterator;
 import org.rocksdb.WriteBatch;
 import org.rocksdb.WriteOptions;
 
@@ -64,6 +65,27 @@ public class KeyStoreTable {
         numBatch++;
 
         checkFlush(1000);
+    }
+
+
+    public void scan(byte[] startKey, IScanCallback scanCallback) {
+        RocksIterator iter = db.newIterator();
+
+        iter.seek(startKey);
+
+        while (iter.isValid()) {
+            byte[] key = iter.key();
+            byte[] val = iter.value();
+
+            boolean keepGoing = scanCallback.onRow(key, val);
+            if (!keepGoing) {
+                break;
+            }
+
+            iter.next();
+        }
+
+        iter.dispose();
     }
 
 

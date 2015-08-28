@@ -4,9 +4,12 @@ package com.qualia.keystore_graph;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.rocksdb.RocksDBException;
 
@@ -50,6 +53,57 @@ public class GraphStorage {
         } catch (RocksDBException | IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+
+    public Collection<GlobalKey> getAllMappings(GlobalKey rootKey) {
+        Set<GlobalKey> followedKeys = new HashSet<GlobalKey>();
+        Set<GlobalKey> unFollowedKeys = new HashSet<GlobalKey>();
+        unFollowedKeys.add(rootKey);
+
+        while (unFollowedKeys.size() > 0) {
+            GlobalKey srcKey = unFollowedKeys.iterator().next();
+            List<GlobalKey> directMappings = getDirectMappings(srcKey);
+            unFollowedKeys.remove(srcKey);
+            followedKeys.add(srcKey);
+            for (GlobalKey foundKey : directMappings) {
+                if (!followedKeys.contains(foundKey)) {
+                    unFollowedKeys.add(foundKey);
+                }
+            }
+        }
+
+        return followedKeys;
+    }
+
+
+    private List<GlobalKey> getDirectMappings(final GlobalKey srcKey) {
+        final List<GlobalKey> result = new ArrayList<GlobalKey>();
+        final byte[] srcHash = srcKey.getHashValue();
+
+        // Scan where the srcKey bytes match the first bytes from the scan key.
+        // Key of the Mapping table is [src.bytes][dest.bytes]
+        mappingTable.scan(srcHash, new IScanCallback() {
+            @Override
+            public boolean onRow(byte[] key, byte[] value) {
+                boolean keyMatches = true;
+                for (int i = 0; i < srcHash.length; i++) {
+                    if (srcHash[i] != key[i]) {
+                        keyMatches = false;
+                        break;
+                    }
+                }
+                if (keyMatches) {
+                    byte[] tmp = new byte[GlobalKey.KEY_LENGTH];
+                    System.arraycopy(key, srcHash.length, tmp, 0, GlobalKey.KEY_LENGTH);
+                    GlobalKey destKey = GlobalKey.createFromBytes(tmp);
+                    result.add(destKey);
+                }
+                return keyMatches;
+            }
+        });
+
+        return result;
     }
 
 
