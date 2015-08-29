@@ -15,10 +15,14 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 
 public class KeyStoreTable {
+	private static final int DEFAULT_BATCH_SIZE = 1000;
+	private static final boolean DEFAULT_WRITE_TO_WAL = false;
+
 	private final RocksDB db;
 	private WriteBatch writeBatch;
-	private WriteOptions writeOptions;
 	private int numBatch = 0;
+	private int batchSize = DEFAULT_BATCH_SIZE;
+	private boolean writeToWAL = DEFAULT_WRITE_TO_WAL;
 
 	public KeyStoreTable(String tableName, boolean compress, boolean readOnly) {
 		File dir = new File("test-db", tableName);
@@ -28,10 +32,6 @@ public class KeyStoreTable {
 			throw new RuntimeException(e);
 		}
 
-		writeOptions = new WriteOptions();
-		writeOptions.setSync(false);
-		writeOptions.setDisableWAL(true);
-
 		writeBatch = new WriteBatch();
 	}
 
@@ -39,7 +39,7 @@ public class KeyStoreTable {
 		writeBatch.put(key, getBytesForValue(value));
 		numBatch++;
 
-		checkFlush(1000);
+		checkFlush(batchSize);
 	}
 
 	public void scan(byte[] startKey, IScanCallback scanCallback) {
@@ -64,6 +64,10 @@ public class KeyStoreTable {
 
 	private void checkFlush(int checkSize) throws RocksDBException {
 		if (numBatch >= checkSize) {
+			WriteOptions writeOptions = new WriteOptions();
+			writeOptions.setSync(false);
+			writeOptions.setDisableWAL(!isWriteToWAL());
+
 			db.write(writeOptions, writeBatch);
 			writeBatch.dispose();
 			numBatch = 0;
@@ -110,6 +114,22 @@ public class KeyStoreTable {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	public int getBatchSize() {
+		return batchSize;
+	}
+
+	public void setBatchSize(int batchSize) {
+		this.batchSize = batchSize;
+	}
+
+	public boolean isWriteToWAL() {
+		return writeToWAL;
+	}
+
+	public void setWriteToWAL(boolean writeToWAL) {
+		this.writeToWAL = writeToWAL;
 	}
 
 }

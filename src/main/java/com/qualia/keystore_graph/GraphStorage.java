@@ -24,6 +24,7 @@ public class GraphStorage {
     private final KeyStoreTable propertyTable;
     private final KeyStoreTable hashLookupTable;
     private final KeyStoreTable ipMappingTable;
+	private final KeyStoreTable fileSaveTable;
 
 
     public GraphStorage(boolean readOnly) {
@@ -31,6 +32,10 @@ public class GraphStorage {
         propertyTable = new KeyStoreTable("property", true, readOnly);
         hashLookupTable = new KeyStoreTable("hash_lookup", true, readOnly);
         ipMappingTable = new KeyStoreTable("ip_mapping", true, readOnly);
+        fileSaveTable = new KeyStoreTable("file_save", true, readOnly);
+        // We want this to update immediately.  Its low volume so its OK.
+        fileSaveTable.setBatchSize(1);
+        fileSaveTable.setWriteToWAL(true);
     }
 
 
@@ -128,7 +133,17 @@ public class GraphStorage {
 
 
     public void saveIPMapping(GlobalKey globalKey, int packedIPAddress, int lastSeen) {
+        try {
+            ByteArrayOutputStream bs = new ByteArrayOutputStream();
+            bs.write(globalKey.getHashValue());
+            bs.write(KeyStoreTable.getBytesForValue(packedIPAddress));
+            // Note - we could also include lastSeen in the key.  Would take
+            // more storage, but allow us to get a count.
 
+            ipMappingTable.put(bs.toByteArray(), KeyStoreTable.getBytesForValue(lastSeen));
+        } catch (IOException | RocksDBException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
@@ -143,6 +158,15 @@ public class GraphStorage {
             throw new RuntimeException(e);
         }
     }
+    
+    public void saveLoadFileProperty(String loadedFileName, String propName, Object value) {
+        try {
+        	String key = loadedFileName + "\t" + propName;
+			hashLookupTable.put(key.getBytes(Charsets.UTF_8), value);
+		} catch (RocksDBException e) {
+            throw new RuntimeException(e);
+		}
+    }
 
 
     public void close() {
@@ -150,6 +174,7 @@ public class GraphStorage {
         propertyTable.close();
         hashLookupTable.close();
         ipMappingTable.close();
+        fileSaveTable.close();
     }
 
 

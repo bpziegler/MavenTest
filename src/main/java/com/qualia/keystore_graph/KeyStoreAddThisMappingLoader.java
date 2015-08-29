@@ -18,27 +18,18 @@ public class KeyStoreAddThisMappingLoader extends FileLoader {
 
     private final DateTimeFormatter dateFmt = DateTimeFormat.forPattern("YYYYmmdd");
 
-    private final GraphStorage storage;
     private Splitter tabSplitter = Splitter.on("\t");
     private Splitter commaSplitter = Splitter.on(",");
     private Splitter equalSplitter = Splitter.on("=");
     private HashMap<String, String> pidCodes = new HashMap<String, String>();
 
 
-    public KeyStoreAddThisMappingLoader(Status status, File inputFile) {
-    	super(status, inputFile);
-        this.storage = new GraphStorage(false);
+    public KeyStoreAddThisMappingLoader(Status status, File inputFile, String saveName) {
+    	super(status, inputFile, saveName);
         pidCodes.put("6", "adnxs");
         pidCodes.put("9", "fat");
         pidCodes.put("11127", "ltm");
     }
-
-
-    @Override
-	public void processFile() throws IOException {
-		super.processFile();
-		storage.close();
-	}
 
 
 	@Override

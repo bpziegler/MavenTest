@@ -44,7 +44,7 @@ public class DirLoader {
 			String relative = new File(base).toURI().relativize(new File(path).toURI()).getPath();
 			
 			if (pathLower.contains("cookie")) {
-				CookieLoader cookieLoader = new CookieLoader(status, oneFile);
+				CookieLoader cookieLoader = new CookieLoader(status, oneFile, relative);
 				service.submit(cookieLoader);
 			} else if (pathLower.contains("addThis")) {
 				throw new RuntimeException("test");
