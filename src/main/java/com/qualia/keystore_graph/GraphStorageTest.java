@@ -3,6 +3,7 @@ package com.qualia.keystore_graph;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -11,6 +12,8 @@ import org.joda.time.DateTime;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
+
+import eu.bitwalker.useragentutils.UserAgent;
 
 
 public class GraphStorageTest {
@@ -53,7 +56,7 @@ public class GraphStorageTest {
     }
     
     
-    public static void main(String[] args) throws IOException {
+    public static void testSaveLoadFileProperty(String[] args) throws IOException {
         GraphStorage storage = new GraphStorage(false);
         
         for (int i = 0; i < 200000; i++) {
@@ -62,5 +65,22 @@ public class GraphStorageTest {
         }
 
         storage.close();
+    }
+    
+    public static void main(String[] args) throws IOException {
+    	long start = System.currentTimeMillis();
+    	InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("user_agent_strings.txt");
+    	long elap = System.currentTimeMillis() - start;
+    	System.out.println("elap = " + elap);
+    	
+    	String test = "Mozilla/5.0 (iPhone; CPU iPhone OS 8_2 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) GSA/6.0.51363 Mobile/12D508 Safari/600.1.4";
+    	
+    	for (int i = 0; i < 100 * 1000; i++) {
+	    	// UserAgentInfo result = parser.parse();
+	    	UserAgent ua = UserAgent.parseUserAgentString(test);
+	    	// System.out.println(i + "   " + result.toString().length());
+    	}
+    	elap = System.currentTimeMillis() - start;
+    	System.out.println("elap = " + elap);
     }
 }

@@ -8,6 +8,8 @@ package com.qualia.keystore_graph;
  */
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,8 +18,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.common.base.Splitter;
 
-public class CookieLoader extends FileLoader {
+import eu.bitwalker.useragentutils.UserAgent;
 
+public class CookieLoader extends FileLoader {
+	
 	private final ObjectMapper mapper = new ObjectMapper();
 	private final Splitter dotSplitter = Splitter.on(".");
 
@@ -41,10 +45,12 @@ public class CookieLoader extends FileLoader {
 		String ip = tree.get("ip").asText();		
 		int ipInt = convertIpStringtoInt(ip);
 		
-//		String userAgent = tree.get("user-agent").asText();
-//		ReadableUserAgent agent = parser.parse(userAgent);
-//		UserAgentFamily browserFamily = agent.getFamily();
-//		OperatingSystemFamily osFamily = agent.getOperatingSystem().getFamily();
+		String userAgent = tree.get("user-agent").asText();
+    	UserAgent agent = UserAgent.parseUserAgentString(userAgent);
+		String os = agent.getOperatingSystem().getGroup().getName();
+		String browser = agent.getBrowser().getGroup().getName();
+//		System.out.println(os);
+//		System.out.println(browser);
 
 		List<GlobalKey> mapping = new ArrayList<GlobalKey>();
 
@@ -75,8 +81,8 @@ public class CookieLoader extends FileLoader {
 				storage.saveProperty(key, PropertyLabel.LAST_SEEN, dateInt);
 				if (pid.equals("lr")) {
 					storage.saveIPMapping(key, ipInt, dateInt);
-//					storage.saveProperty(key, PropertyLabel.BROWSER, browserFamily.toString());
-//					storage.saveProperty(key, PropertyLabel.PLATFORM, osFamily.toString());
+					storage.saveProperty(key, PropertyLabel.BROWSER, browser);
+					storage.saveProperty(key, PropertyLabel.PLATFORM, os);
 				}
 			}
 
