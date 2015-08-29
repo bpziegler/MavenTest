@@ -51,7 +51,12 @@ public abstract class FileLoader implements Runnable {
 		bytesLastSent = 0;
 
 		while ((line = br.readLine()) != null) {
-			processLine(line, curLine);
+			try {
+				processLine(line, curLine);
+			} catch (Exception e) {
+				status.numErrors.incrementAndGet();
+				e.printStackTrace();
+			}
 			curLine++;
 			linesToSend++;
 
@@ -77,5 +82,5 @@ public abstract class FileLoader implements Runnable {
 		return "";
 	}
 
-	public abstract void processLine(String line, long curLine);
+	public abstract void processLine(String line, long curLine) throws Exception;
 }
