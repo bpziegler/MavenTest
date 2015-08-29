@@ -42,6 +42,10 @@ public class KeyStoreTable {
 		checkFlush(batchSize);
 	}
 
+	public void putNoBatch(byte[] key, Object value) throws RocksDBException {
+		db.put(key, getBytesForValue(value));
+	}
+
 	public void scan(byte[] startKey, IScanCallback scanCallback) {
 		RocksIterator iter = db.newIterator();
 

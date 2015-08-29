@@ -162,7 +162,7 @@ public class GraphStorage {
     public void saveLoadFileProperty(String loadedFileName, String propName, Object value) {
         try {
         	String key = loadedFileName + "\t" + propName;
-        	fileSaveTable.put(key.getBytes(Charsets.UTF_8), value);
+        	fileSaveTable.putNoBatch(key.getBytes(Charsets.UTF_8), value);
 		} catch (RocksDBException e) {
             throw new RuntimeException(e);
 		}

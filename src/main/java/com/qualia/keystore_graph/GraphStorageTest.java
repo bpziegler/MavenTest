@@ -56,7 +56,7 @@ public class GraphStorageTest {
     public static void main(String[] args) throws IOException {
         GraphStorage storage = new GraphStorage(false);
         
-        for (int i = 0; i < 2000; i++) {
+        for (int i = 0; i < 200000; i++) {
         	System.out.println(i);
         	storage.saveLoadFileProperty("test"+i, "start", DateTime.now().toString());
         }
