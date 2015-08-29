@@ -66,10 +66,13 @@ public class KeyStoreTable {
 		if (numBatch >= checkSize) {
 			WriteOptions writeOptions = new WriteOptions();
 			writeOptions.setSync(false);
-			writeOptions.setDisableWAL(!isWriteToWAL());
+			if (isWriteToWAL() == false) {
+				writeOptions.setDisableWAL(true);
+			}
 
 			db.write(writeOptions, writeBatch);
 			writeBatch.dispose();
+			writeOptions.dispose();
 			numBatch = 0;
 			writeBatch = new WriteBatch();
 		}

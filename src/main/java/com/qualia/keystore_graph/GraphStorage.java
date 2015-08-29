@@ -34,8 +34,8 @@ public class GraphStorage {
         ipMappingTable = new KeyStoreTable("ip_mapping", true, readOnly);
         fileSaveTable = new KeyStoreTable("file_save", true, readOnly);
         // We want this to update immediately.  Its low volume so its OK.
-        fileSaveTable.setBatchSize(1);
-        fileSaveTable.setWriteToWAL(true);
+         fileSaveTable.setBatchSize(1);
+         fileSaveTable.setWriteToWAL(true);
     }
 
 
@@ -162,7 +162,7 @@ public class GraphStorage {
     public void saveLoadFileProperty(String loadedFileName, String propName, Object value) {
         try {
         	String key = loadedFileName + "\t" + propName;
-			hashLookupTable.put(key.getBytes(Charsets.UTF_8), value);
+        	fileSaveTable.put(key.getBytes(Charsets.UTF_8), value);
 		} catch (RocksDBException e) {
             throw new RuntimeException(e);
 		}

@@ -16,19 +16,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.common.base.Splitter;
 
-import net.sf.uadetector.OperatingSystemFamily;
-import net.sf.uadetector.ReadableUserAgent;
-import net.sf.uadetector.UserAgentFamily;
-import net.sf.uadetector.UserAgentStringParser;
-import net.sf.uadetector.service.UADetectorServiceFactory;
-
 public class CookieLoader extends FileLoader {
 
 	private final ObjectMapper mapper = new ObjectMapper();
 	private final Splitter dotSplitter = Splitter.on(".");
 
-	private final UserAgentStringParser parser = UADetectorServiceFactory.getResourceModuleParser();
-	
 	public CookieLoader(Status status, File inputFile, String saveName) {
 		super(status, inputFile, saveName);
 	}
@@ -49,10 +41,10 @@ public class CookieLoader extends FileLoader {
 		String ip = tree.get("ip").asText();		
 		int ipInt = convertIpStringtoInt(ip);
 		
-		String userAgent = tree.get("user-agent").asText();
-		ReadableUserAgent agent = parser.parse(userAgent);
-		UserAgentFamily browserFamily = agent.getFamily();
-		OperatingSystemFamily osFamily = agent.getOperatingSystem().getFamily();
+//		String userAgent = tree.get("user-agent").asText();
+//		ReadableUserAgent agent = parser.parse(userAgent);
+//		UserAgentFamily browserFamily = agent.getFamily();
+//		OperatingSystemFamily osFamily = agent.getOperatingSystem().getFamily();
 
 		List<GlobalKey> mapping = new ArrayList<GlobalKey>();
 
@@ -83,8 +75,8 @@ public class CookieLoader extends FileLoader {
 				storage.saveProperty(key, PropertyLabel.LAST_SEEN, dateInt);
 				if (pid.equals("lr")) {
 					storage.saveIPMapping(key, ipInt, dateInt);
-					storage.saveProperty(key, PropertyLabel.BROWSER, browserFamily.toString());
-					storage.saveProperty(key, PropertyLabel.PLATFORM, osFamily.toString());
+//					storage.saveProperty(key, PropertyLabel.BROWSER, browserFamily.toString());
+//					storage.saveProperty(key, PropertyLabel.PLATFORM, osFamily.toString());
 				}
 			}
 

@@ -33,6 +33,7 @@ public class DirLoader {
 		statusThread.start();
 		
 		int numCpu = Runtime.getRuntime().availableProcessors();
+		numCpu = Math.max(2, numCpu-2);
 		ExecutorService service = Executors.newFixedThreadPool(numCpu);
 		
 		// Process all files

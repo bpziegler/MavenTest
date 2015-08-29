@@ -7,13 +7,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.joda.time.DateTime;
+
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 
 
 public class GraphStorageTest {
 
-    public static void main(String[] args) throws IOException {
+    public static void test1(String[] args) throws IOException {
         List<String> pid_uids = new ArrayList<String>();
 
         if (args.length > 0) {
@@ -45,6 +47,18 @@ public class GraphStorageTest {
             }
 
             num++;
+        }
+
+        storage.close();
+    }
+    
+    
+    public static void main(String[] args) throws IOException {
+        GraphStorage storage = new GraphStorage(false);
+        
+        for (int i = 0; i < 2000; i++) {
+        	System.out.println(i);
+        	storage.saveLoadFileProperty("test"+i, "start", DateTime.now().toString());
         }
 
         storage.close();
