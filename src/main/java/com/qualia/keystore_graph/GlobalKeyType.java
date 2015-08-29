@@ -20,6 +20,10 @@ public enum GlobalKeyType {
     public String getPid() {
         return pid;
     }
+    
+    public boolean isCookieType() {
+    	return (this == COOKIE) || (this == APPNEXUS) || (this == GlobalKeyType.LOTAME);
+    }
 
 
     public static GlobalKeyType fromPid(String pid) {

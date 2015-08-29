@@ -27,6 +27,7 @@ import com.qualia.hbase.AddThisMappingLoader;
 import com.qualia.iqscores.SegmentOverlap;
 import com.qualia.keystore_graph.CompactRocks;
 import com.qualia.keystore_graph.GraphStorageTest;
+import com.qualia.keystore_graph.HashReport;
 import com.qualia.keystore_graph.KeyStoreAddThisMappingLoader;
 import com.qualia.test.JettyTest;
 import com.qualia.test.RocksTest;
@@ -63,6 +64,7 @@ public class Launcher {
         register(KeyStoreAddThisMappingLoader.class);
         register(GraphStorageTest.class);
         register(CompactRocks.class);
+        register(HashReport.class);
     }
 
 
