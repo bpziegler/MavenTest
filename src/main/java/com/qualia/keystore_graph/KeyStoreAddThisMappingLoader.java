@@ -2,6 +2,7 @@ package com.qualia.keystore_graph;
 
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,8 +25,9 @@ public class KeyStoreAddThisMappingLoader extends FileLoader {
     private HashMap<String, String> pidCodes = new HashMap<String, String>();
 
 
-    public KeyStoreAddThisMappingLoader(GraphStorage storage) {
-        this.storage = storage;
+    public KeyStoreAddThisMappingLoader(Status status, File inputFile) {
+    	super(status, inputFile);
+        this.storage = new GraphStorage(false);
         pidCodes.put("6", "adnxs");
         pidCodes.put("9", "fat");
         pidCodes.put("11127", "ltm");
@@ -33,6 +35,13 @@ public class KeyStoreAddThisMappingLoader extends FileLoader {
 
 
     @Override
+	public void processFile() throws IOException {
+		super.processFile();
+		storage.close();
+	}
+
+
+	@Override
     public void processLine(String line, long curLine) {
         List<String> parts = tabSplitter.splitToList(line);
         String timestampStr = parts.get(0);
@@ -68,16 +77,5 @@ public class KeyStoreAddThisMappingLoader extends FileLoader {
 
         storage.saveMapping(mappings);
     }
-
-
-    public static void main(String[] args) throws Exception {
-        GraphStorage storage = new GraphStorage(false);
-        KeyStoreAddThisMappingLoader loader = new KeyStoreAddThisMappingLoader(storage);
-        String path = (args.length > 0) ? args[0] : null;
-        if (path == null) {
-            path = "/Users/benziegler/test_data/addThisMapping/batch-uids-localresponse-150819_20150820065001.gz";
-        }
-        loader.processFile(new File(path));
-        storage.close();
-    }
+    
 }

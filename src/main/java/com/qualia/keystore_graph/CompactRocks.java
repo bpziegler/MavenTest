@@ -21,7 +21,7 @@ public class CompactRocks {
         }
 
         System.out.println("Opening RocksDB = " + path);
-        RocksDB db = RocksDB.open(KeyStoreTable.getDefaultOptions(compress), path);
+        RocksDB db = RocksDB.open(Database.getDefaultOptions(compress), path);
         System.out.println("Compacting");
         db.compactRange();
 
