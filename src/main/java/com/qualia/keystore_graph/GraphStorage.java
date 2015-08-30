@@ -2,6 +2,7 @@ package com.qualia.keystore_graph;
 
 
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,7 +17,7 @@ import org.rocksdb.RocksDBException;
 import com.google.common.base.Charsets;
 
 
-public class GraphStorage {
+public class GraphStorage implements Closeable {
 
     private static final int MAX_MAPPINGS_PER_KEY = 32;
 
@@ -207,6 +208,20 @@ public class GraphStorage {
         fileSaveTable.close();
     }
 
+
+	public void dumpCluster(Collection<GlobalKey> cluster) {
+		List<String> ids = new ArrayList<String>();
+		for (GlobalKey key : cluster) {
+			String id = this.lookupId(key);
+			ids.add(id);
+		}
+		Collections.sort(ids);
+		int i = 0;
+		for (String id : ids) {
+			i++;
+			System.out.println(String.format("%4d of %4d   %s", i, cluster.size(), id));
+		}
+	}
 
     private void saveMappingPair(GlobalKey key1, GlobalKey key2) {
         try {

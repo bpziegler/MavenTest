@@ -1,6 +1,7 @@
 package com.qualia.keystore_graph;
 
 
+import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 
@@ -12,7 +13,7 @@ public class CompactRocks {
         if (args.length > 0) {
             path = args[0];
         } else {
-            path = "test-db";
+            path = "test-db/mapping";
         }
 
         boolean compress = false;
@@ -21,7 +22,9 @@ public class CompactRocks {
         }
 
         System.out.println("Opening RocksDB = " + path);
-        RocksDB db = RocksDB.open(Database.getDefaultOptions(compress), path);
+        Options options = Database.getDefaultOptions(compress);
+        options.setCreateIfMissing(false);
+        RocksDB db = RocksDB.open(options, path);
         System.out.println("Compacting");
         db.compactRange();
 

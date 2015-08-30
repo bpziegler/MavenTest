@@ -1,86 +1,69 @@
 package com.qualia.keystore_graph;
 
-
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 import org.joda.time.DateTime;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
-
 import eu.bitwalker.useragentutils.UserAgent;
-
 
 public class GraphStorageTest {
 
-    public static void test1(String[] args) throws IOException {
-        List<String> pid_uids = new ArrayList<String>();
+	public static void testSaveLoadFileProperty(String[] args) throws IOException {
+		GraphStorage storage = new GraphStorage(false);
 
-        if (args.length > 0) {
-            List<String> lines = Files.readLines(new File(args[0]), Charsets.UTF_8);
-            for (String line : lines) {
-                pid_uids.add("lr_" + line);
-            }
-        } else {
-            String pid_uid = (args.length > 0) ? args[0] : "lr_00000e29-7a9f-4ec2-beb2-6c86c518c973";
-            pid_uids.add(pid_uid);
-        }
+		for (int i = 0; i < 200000; i++) {
+			System.out.println(i);
+			storage.saveLoadFileProperty("test" + i, "start", DateTime.now().toString());
+		}
 
-        long startTime = System.currentTimeMillis();
-        long lastLog = 0;
-        GraphStorage storage = new GraphStorage(true);
-        int num = 0;
-        for (String pid_uid : pid_uids) {
-            int underscore = pid_uid.indexOf("_");
-            String pid = pid_uid.substring(0, underscore);
-            String uid = pid_uid.substring(underscore + 1);
-            GlobalKey rootKey = GlobalKey.createFromPidUid(pid, uid);
-            Collection<GlobalKey> keys = storage.getAllMappings(rootKey);
+		storage.close();
+	}
 
-            long now = System.currentTimeMillis();
-            if (now - lastLog >= 250) {
-                lastLog = now;
-                double elap = (0.0 + now - startTime) / 1000.0;
-                System.out.println(String.format("Elap %,8.1f   Num = %,8d   %3d   %s", elap, num, keys.size(), keys.iterator().next()));
-            }
+	public static void speedTestUserAgentParse(String[] args) throws IOException {
+		long start = System.currentTimeMillis();
+		InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("user_agent_strings.txt");
+		long elap = System.currentTimeMillis() - start;
+		System.out.println("elap = " + elap);
 
-            num++;
-        }
+		String test = "Mozilla/5.0 (iPhone; CPU iPhone OS 8_2 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) GSA/6.0.51363 Mobile/12D508 Safari/600.1.4";
 
-        storage.close();
-    }
-    
-    
-    public static void testSaveLoadFileProperty(String[] args) throws IOException {
-        GraphStorage storage = new GraphStorage(false);
-        
-        for (int i = 0; i < 200000; i++) {
-        	System.out.println(i);
-        	storage.saveLoadFileProperty("test"+i, "start", DateTime.now().toString());
-        }
+		for (int i = 0; i < 100 * 1000; i++) {
+			// UserAgentInfo result = parser.parse();
+			UserAgent ua = UserAgent.parseUserAgentString(test);
+			// System.out.println(i + " " + result.toString().length());
+		}
+		elap = System.currentTimeMillis() - start;
+		System.out.println("elap = " + elap);
+	}
 
-        storage.close();
-    }
-    
-    public static void main(String[] args) throws IOException {
-    	long start = System.currentTimeMillis();
-    	InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("user_agent_strings.txt");
-    	long elap = System.currentTimeMillis() - start;
-    	System.out.println("elap = " + elap);
-    	
-    	String test = "Mozilla/5.0 (iPhone; CPU iPhone OS 8_2 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) GSA/6.0.51363 Mobile/12D508 Safari/600.1.4";
-    	
-    	for (int i = 0; i < 100 * 1000; i++) {
-	    	// UserAgentInfo result = parser.parse();
-	    	UserAgent ua = UserAgent.parseUserAgentString(test);
-	    	// System.out.println(i + "   " + result.toString().length());
-    	}
-    	elap = System.currentTimeMillis() - start;
-    	System.out.println("elap = " + elap);
-    }
+	// TOO slow - 2000/sec requests to pool
+	// public static void speedTestGraphStoragePool(String[] args) throws
+	// Exception {
+	// long start = System.currentTimeMillis();
+	//
+	// GraphStoragePool pool = new GraphStoragePool();
+	//
+	// for (int i = 0; i < 1000 * 1000; i++) {
+	// GraphStorage store = pool.borrowObject();
+	// pool.returnObject(store);
+	// if (i % 1000 == 0) {
+	// long elap = System.currentTimeMillis() - start;
+	// System.out.println(String.format("Elap %,8d Num %,8d", elap, i));
+	// }
+	// }
+	//
+	// long elap = System.currentTimeMillis() - start;
+	// System.out.println("elap = " + elap);
+	//
+	// pool.close();
+	// }
+
+	public static void main(String[] args) throws Exception {
+		long start = System.currentTimeMillis();
+		
+
+		long elap = System.currentTimeMillis() - start;
+		System.out.println("elap = " + elap);
+	}
 }
