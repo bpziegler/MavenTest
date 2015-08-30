@@ -34,7 +34,6 @@ public class GraphStorage {
         ipMappingTable = new KeyStoreTable("ip_mapping", true, readOnly);
         fileSaveTable = new KeyStoreTable("file_save", true, readOnly);
         // We want this to update immediately.  Its low volume so its OK.
-         fileSaveTable.setBatchSize(1);
          fileSaveTable.setWriteToWAL(true);
     }
 

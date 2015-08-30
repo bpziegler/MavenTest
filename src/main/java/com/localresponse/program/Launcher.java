@@ -6,31 +6,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.neo4j.kernel.impl.nioneo.store.PropertyKeyDumper;
-
-import com.localresponse.misc.ExtractCookieLines;
-import com.localresponse.neo4j_tool.GraphCompactor;
-import com.localresponse.neo4j_tool.GraphUniquePropertyChecker;
-import com.localresponse.neo4j_tool.Neo4jStoreStats;
 import com.localresponse.neo4j_tool.NodeStoreDump;
 import com.localresponse.neo4j_tool.PropertyStoreDump;
 import com.localresponse.neo4j_tool.RelationshipStoreDump;
-import com.localresponse.tapad.CheckUnique;
-import com.localresponse.tapad.LargeLines;
-import com.localresponse.tapad.TapadPartition;
-import com.localresponse.tapad_load.TapadLoader;
-import com.localresponse.tapad_util.TapadUniqueLineAnalyzer;
-import com.qualia.bluecava.BlueCavaStats;
 import com.qualia.cookie.RocksCookieScan;
 import com.qualia.cookie.RocksCookieTest;
-import com.qualia.hbase.AddThisMappingLoader;
-import com.qualia.iqscores.SegmentOverlap;
 import com.qualia.keystore_graph.CompactRocks;
+import com.qualia.keystore_graph.DirLoader;
+import com.qualia.keystore_graph.DumpClusters;
 import com.qualia.keystore_graph.GraphStorageTest;
 import com.qualia.keystore_graph.HashReport;
 import com.qualia.keystore_graph.KeyStoreAddThisMappingLoader;
 import com.qualia.test.JettyTest;
-import com.qualia.test.RocksTest;
 import com.qualia.util.UniqueLines;
 
 
@@ -40,31 +27,19 @@ public class Launcher {
 
 
     public static void registerPrograms() {
-        register(TapadPartition.class);
-        register(CheckUnique.class);
-        register(GraphCompactor.class);
-        register(TapadLoader.class);
-        register(LargeLines.class);
-        register(ExtractCookieLines.class);
-        register(TapadUniqueLineAnalyzer.class);
-        register(BlueCavaStats.class);
-        register(GraphUniquePropertyChecker.class);
-        register(SegmentOverlap.class);
-        register(RocksTest.class);
+        register(UniqueLines.class);
         register(RocksCookieTest.class);
         register(RocksCookieScan.class);
-        register(Neo4jStoreStats.class);
+        register(CompactRocks.class);
         register(NodeStoreDump.class);
-        register(UniqueLines.class);
         register(RelationshipStoreDump.class);
         register(PropertyStoreDump.class);
-        register(AddThisMappingLoader.class);
-        register(PropertyKeyDumper.class);
         register(JettyTest.class);
         register(KeyStoreAddThisMappingLoader.class);
         register(GraphStorageTest.class);
-        register(CompactRocks.class);
+        register(DirLoader.class);
         register(HashReport.class);
+        register(DumpClusters.class);
     }
 
 

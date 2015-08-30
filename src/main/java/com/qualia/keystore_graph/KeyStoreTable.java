@@ -21,7 +21,6 @@ public class KeyStoreTable {
 	private final RocksDB db;
 	private WriteBatch writeBatch;
 	private int numBatch = 0;
-	private int batchSize = DEFAULT_BATCH_SIZE;
 	private boolean writeToWAL = DEFAULT_WRITE_TO_WAL;
 
 	public KeyStoreTable(String tableName, boolean compress, boolean readOnly) {
@@ -39,7 +38,7 @@ public class KeyStoreTable {
 		writeBatch.put(key, getBytesForValue(value));
 		numBatch++;
 
-		checkFlush(batchSize);
+		checkFlush(DEFAULT_BATCH_SIZE);
 	}
 
 	public void putNoBatch(byte[] key, Object value) throws RocksDBException {
@@ -121,14 +120,6 @@ public class KeyStoreTable {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-	}
-
-	public int getBatchSize() {
-		return batchSize;
-	}
-
-	public void setBatchSize(int batchSize) {
-		this.batchSize = batchSize;
 	}
 
 	public boolean isWriteToWAL() {

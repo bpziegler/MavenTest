@@ -23,7 +23,7 @@ import com.qualia.util.ILineProcessor;
 import com.qualia.util.MultiFileLineProcessor;
 
 
-public class AddThisMappingLoader {
+public class HBaseAddThisMappingLoader {
 
     private Splitter tabSplitter = Splitter.on("\t");
     private Splitter commaSplitter = Splitter.on(",");
@@ -70,7 +70,7 @@ public class AddThisMappingLoader {
     }
 
 
-    public AddThisMappingLoader() {
+    public HBaseAddThisMappingLoader() {
         pidCodes.put("6", "adnxs");
         pidCodes.put("9", "fat");
         pidCodes.put("11127", "ltm");
@@ -87,7 +87,7 @@ public class AddThisMappingLoader {
         multiLineProcessor.processFiles(list, new ILineProcessor() {
             public void processLine(String line, long curLine) {
                 try {
-                    AddThisMappingLoader.this.processLine(line, curLine);
+                    HBaseAddThisMappingLoader.this.processLine(line, curLine);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -164,7 +164,7 @@ public class AddThisMappingLoader {
 
 
     public static void main(String[] args) throws Exception {
-        AddThisMappingLoader loader = new AddThisMappingLoader();
+        HBaseAddThisMappingLoader loader = new HBaseAddThisMappingLoader();
         String path = (args.length > 0) ? args[0] : null;
         if (path == null) {
             path = "test_data/batch-uids-localresponse-150627_20150628065001";
