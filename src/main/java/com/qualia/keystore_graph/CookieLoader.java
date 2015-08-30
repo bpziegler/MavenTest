@@ -75,7 +75,7 @@ public class CookieLoader extends FileLoader {
 			for (JsonNode oneMapping : lineMapping) {
 				String pid = oneMapping.get("pid").asText();
 				String uid = oneMapping.get("uid").asText();
-	            if (Constants.BAD_UIDS.contains(uid) || (uid.trim().length() == 0)) {
+	            if (Constants.isBadUID(uid)) {
 	                continue;
 	            }
 				GlobalKey key = GlobalKey.createFromPidUid(pid, uid);
