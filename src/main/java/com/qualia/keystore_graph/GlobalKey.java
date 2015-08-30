@@ -24,6 +24,7 @@ public class GlobalKey {
     // chance of collision is therefore 2^(60/2) ~= collision every 1 billion nodes (or better with entropy of
     // GlobalKeyType)
     private final byte[] hashValue;
+    private final int fastJavaHashCode;
 
 
     public static GlobalKey createFromPidUid(String pid, String uid) {
@@ -64,6 +65,7 @@ public class GlobalKey {
 
     private GlobalKey(byte[] hashValue) {
         this.hashValue = hashValue;
+        this.fastJavaHashCode = calcFastHashCode(); 
     }
 
 
@@ -91,12 +93,14 @@ public class GlobalKey {
     }
 
 
+    public int calcFastHashCode() {
+        return Arrays.hashCode(hashValue);
+    }
+
+
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + Arrays.hashCode(hashValue);
-        return result;
+        return fastJavaHashCode;
     }
 
 

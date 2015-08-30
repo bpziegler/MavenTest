@@ -19,6 +19,7 @@ public class KeyStoreTable {
 	private static final boolean DEFAULT_WRITE_TO_WAL = false;
 
 	private final RocksDB db;
+	private RocksIterator iter;
 	private WriteBatch writeBatch;
 	private int numBatch = 0;
 	private int batchSize = DEFAULT_BATCH_SIZE;
@@ -32,6 +33,7 @@ public class KeyStoreTable {
 			throw new RuntimeException(e);
 		}
 
+		iter = db.newIterator();
 		writeBatch = new WriteBatch();
 	}
 
@@ -47,8 +49,6 @@ public class KeyStoreTable {
 	}
 
 	public void scan(byte[] startKey, IScanCallback scanCallback) {
-		RocksIterator iter = db.newIterator();
-
 		iter.seek(startKey);
 
 		while (iter.isValid()) {
@@ -62,8 +62,6 @@ public class KeyStoreTable {
 
 			iter.next();
 		}
-
-		iter.dispose();
 	}
 
 	private void checkFlush(int checkSize) throws RocksDBException {
@@ -100,6 +98,7 @@ public class KeyStoreTable {
 
 	public void close() {
 		flush();
+		iter.dispose();
 		writeBatch.dispose();
 	}
 
