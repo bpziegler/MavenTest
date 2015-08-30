@@ -47,7 +47,8 @@ public class DirLoader {
 				CookieLoader cookieLoader = new CookieLoader(status, oneFile, relative);
 				service.submit(cookieLoader);
 			} else if (pathLower.contains("addthis")) {
-				throw new RuntimeException("test");
+				KeyStoreAddThisMappingLoader addThisLoader = new KeyStoreAddThisMappingLoader(status, oneFile, relative);
+				service.submit(addThisLoader);
 			} else {
 				System.out.println("Can't autodetect file " + relative);
 			}
