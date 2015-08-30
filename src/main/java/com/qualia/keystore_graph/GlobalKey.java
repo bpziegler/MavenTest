@@ -1,6 +1,9 @@
 package com.qualia.keystore_graph;
 
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
 import java.util.Arrays;
 
 import com.google.common.base.Charsets;
@@ -66,6 +69,19 @@ public class GlobalKey {
 
     public byte[] getHashValue() {
         return hashValue.clone(); // This is slow but ensures our copy never gets modified
+    }
+
+
+    public long getHashValueAsLong() {
+    	ByteArrayInputStream bs = new ByteArrayInputStream(hashValue);
+    	DataInputStream ds = new DataInputStream(bs);
+    	long result;
+		try {
+			result = ds.readLong();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		} 
+        return result;  
     }
 
 

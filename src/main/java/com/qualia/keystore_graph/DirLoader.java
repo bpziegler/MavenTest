@@ -56,12 +56,12 @@ public class DirLoader {
 		service.shutdown();
 		service.awaitTermination(100, TimeUnit.DAYS);
 		
-		statusThread.done.set(true);
-		statusThread.join();
-
 		System.out.println("Closing database at " + DateTime.now());
 		Database.close();
 		
+		statusThread.done.set(true);
+		statusThread.join();
+
 		System.out.println("Finished at " + DateTime.now());
 	}
 	
