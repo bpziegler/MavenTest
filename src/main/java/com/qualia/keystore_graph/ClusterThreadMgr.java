@@ -26,7 +26,7 @@ public class ClusterThreadMgr extends PoolWorkerManager<GraphStorage, GlobalKey,
 		Collection<GlobalKey> result;
 		try {
 			Preconditions.checkArgNotNull(rowKey, "rowKey can't be null");
-			result = storage.getAllMappings(rowKey, 100000);
+			result = storage.getAllMappings(rowKey, 1000);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
