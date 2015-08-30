@@ -67,13 +67,17 @@ public class GraphStorage {
 
 
     public Collection<GlobalKey> getAllMappings(GlobalKey rootKey) {
+    	return getAllMappings(rootKey, MAX_MAPPINGS_PER_KEY);
+    }
+    
+    public Collection<GlobalKey> getAllMappings(GlobalKey rootKey, int maxMappings) {
         Set<GlobalKey> followedKeys = new HashSet<GlobalKey>();
         Set<GlobalKey> unFollowedKeys = new HashSet<GlobalKey>();
         unFollowedKeys.add(rootKey);
 
         while (unFollowedKeys.size() > 0) {
             GlobalKey srcKey = unFollowedKeys.iterator().next();
-            List<GlobalKey> directMappings = getDirectMappings(srcKey, MAX_MAPPINGS_PER_KEY);
+            List<GlobalKey> directMappings = getDirectMappings(srcKey, maxMappings);
             unFollowedKeys.remove(srcKey);
             followedKeys.add(srcKey);
             for (GlobalKey foundKey : directMappings) {
@@ -81,7 +85,7 @@ public class GraphStorage {
                     unFollowedKeys.add(foundKey);
                 }
             }
-            if (followedKeys.size() >= MAX_MAPPINGS_PER_KEY) {
+            if (followedKeys.size() >= maxMappings) {
                 break;
             }
         }
@@ -166,6 +170,33 @@ public class GraphStorage {
 		} catch (RocksDBException e) {
             throw new RuntimeException(e);
 		}
+    }
+    
+    public String lookupId(final GlobalKey globalKey) {
+    	final List<String> ids = new ArrayList<String>();
+    	
+    	hashLookupTable.scan(globalKey.getHashValue(), new IScanCallback() {
+			@Override
+			public boolean onRow(byte[] key, byte[] value) {
+                byte[] tmp = new byte[GlobalKey.KEY_LENGTH];
+                System.arraycopy(key, 0, tmp, 0, GlobalKey.KEY_LENGTH);
+                GlobalKey destKey = GlobalKey.createFromBytes(tmp);
+                
+                if (destKey.equals(globalKey)) {
+                	String id = new String(key, GlobalKey.KEY_LENGTH, key.length - GlobalKey.KEY_LENGTH, Charsets.UTF_8);
+                	ids.add(id);
+                	return true;
+                } else {
+                	return false;
+                }
+			}
+		});
+    	
+    	// Should we even bother reporting if ids.size > 1?
+    	
+    	String result = (ids.size() > 0) ? ids.get(0) : null;
+    	
+    	return result;
     }
 
 

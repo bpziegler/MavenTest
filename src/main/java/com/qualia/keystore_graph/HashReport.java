@@ -4,6 +4,7 @@ import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 import org.rocksdb.RocksIterator;
 
+import com.google.common.base.Charsets;
 import com.localresponse.util.CountMap;
 
 public class HashReport {
@@ -26,7 +27,7 @@ public class HashReport {
         	byte[] tmp = new byte[GlobalKey.KEY_LENGTH];
         	System.arraycopy(key, 0, tmp, 0, GlobalKey.KEY_LENGTH);
         	GlobalKey rowKey = GlobalKey.createFromBytes(tmp);
-        	String id = new String(key, GlobalKey.KEY_LENGTH, key.length - GlobalKey.KEY_LENGTH);
+        	String id = new String(key, GlobalKey.KEY_LENGTH, key.length - GlobalKey.KEY_LENGTH, Charsets.UTF_8);
         	
         	if (rowKey.equals(prevRowKey)) {
         		System.out.println(String.format("Hash collision   Key %s   id1 %s   id2 %s", rowKey, prevId, id));

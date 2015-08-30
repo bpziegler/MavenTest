@@ -75,6 +75,9 @@ public class CookieLoader extends FileLoader {
 			for (JsonNode oneMapping : lineMapping) {
 				String pid = oneMapping.get("pid").asText();
 				String uid = oneMapping.get("uid").asText();
+	            if (uid.equals("0") || uid.equals("-1")) {
+	                continue;
+	            }
 				GlobalKey key = GlobalKey.createFromPidUid(pid, uid);
 				mapping.add(key);
 				storage.saveHashLookup(key, pid + "_" + uid);
