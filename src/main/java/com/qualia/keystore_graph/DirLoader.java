@@ -46,7 +46,7 @@ public class DirLoader {
 			if (pathLower.contains("cookie")) {
 				CookieLoader cookieLoader = new CookieLoader(status, oneFile, relative);
 				service.submit(cookieLoader);
-			} else if (pathLower.contains("addThis")) {
+			} else if (pathLower.contains("addthis")) {
 				throw new RuntimeException("test");
 			} else {
 				System.out.println("Can't autodetect file " + relative);
