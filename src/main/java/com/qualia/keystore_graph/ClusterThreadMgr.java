@@ -1,6 +1,5 @@
 package com.qualia.keystore_graph;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 import org.parboiled.common.Preconditions;
@@ -42,7 +41,7 @@ public class ClusterThreadMgr extends PoolWorkerManager<GraphStorage, GlobalKey,
 		}
 		if (maxCluster == null || keys.size() > maxCluster.size()) {
 			maxCluster = keys;
-//			storage.dumpCluster(maxCluster);
+			storage.dumpCluster(maxCluster);
 		}
 	}
 

@@ -1,6 +1,7 @@
 package com.qualia.keystore_graph;
 
 
+import org.joda.time.DateTime;
 import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
@@ -25,14 +26,14 @@ public class CompactRocks {
         Options options = Database.getDefaultOptions(compress);
         options.setCreateIfMissing(false);
         RocksDB db = RocksDB.open(options, path);
-        System.out.println("Compacting");
+        System.out.println("Compacting " + DateTime.now().toString());
         db.compactRange();
 
-        System.out.println("Closing");
+        System.out.println("Closing " + DateTime.now().toString());
         db.close();
         db.dispose();
 
-        System.out.println("done");
+        System.out.println("done " + DateTime.now().toString());
     }
 
 }
