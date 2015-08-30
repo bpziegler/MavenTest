@@ -56,7 +56,7 @@ public class KeyStoreAddThisMappingLoader extends FileLoader {
             String pidCode = pidUidParts.get(0);
             String pid = pidCodes.get(pidCode);
             String uid = pidUidParts.get(1);
-            if (uid.equals("0") || uid.equals("-1") || uid.equals("${profile_ID}")) {
+            if (Constants.BAD_UIDS.contains(uid)) {
                 continue;
             }
 
