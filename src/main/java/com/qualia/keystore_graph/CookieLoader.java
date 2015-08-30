@@ -100,14 +100,14 @@ public class CookieLoader extends FileLoader {
 		}
 		
 		try {
-			int result = 0;
+			long result = 0;
 			for (int i = 0; i < 4; i++) {
 				int val = Integer.parseInt(parts.get(i));
 				result = result << 8;
 				result += val;
 			}
 			
-			return result;
+			return (int) result;
 		} catch (NumberFormatException e) {
 			return -1;
 		}
