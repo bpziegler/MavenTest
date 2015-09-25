@@ -7,7 +7,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.lang.time.DurationFormatUtils;
@@ -26,6 +28,13 @@ public class MultiFileLineProcessor {
     private long startTime;
     private long totLines;
     private boolean useGzip;
+
+
+    public void processDir(String dirPath, ILineProcessor lineProcessor) throws IOException {
+        File dir = new File(dirPath);
+        List<File> fileList = Arrays.asList(dir.listFiles());
+        processFiles(fileList, lineProcessor);
+    }
 
 
     public void processFiles(Collection<File> files, ILineProcessor lineProcessor) throws IOException {
@@ -51,8 +60,8 @@ public class MultiFileLineProcessor {
 
 
     private void processFile(File oneFile, int fileNum) throws IOException {
-        //System.out.println("Process file:  " + oneFile.getAbsolutePath());
-        
+        // System.out.println("Process file:  " + oneFile.getAbsolutePath());
+
         FileInputStream fs = new FileInputStream(oneFile);
         CountingInputStream cs = new CountingInputStream(fs);
         InputStream nextStream = cs;

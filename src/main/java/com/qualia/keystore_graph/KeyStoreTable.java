@@ -112,6 +112,11 @@ public class KeyStoreTable {
 				DataOutputStream ds = new DataOutputStream(valStream);
 				ds.writeInt((Integer) value);
 				valueBytes = valStream.toByteArray();
+            } else if (value instanceof Long) {
+                ByteArrayOutputStream valStream = new ByteArrayOutputStream();
+                DataOutputStream ds = new DataOutputStream(valStream);
+                ds.writeLong((Long) value);
+                valueBytes = valStream.toByteArray();
 			} else if (value instanceof byte[]) {
 				valueBytes = (byte[]) value;
 			}

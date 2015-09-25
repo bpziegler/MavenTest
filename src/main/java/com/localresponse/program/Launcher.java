@@ -11,6 +11,8 @@ import com.localresponse.neo4j_tool.PropertyStoreDump;
 import com.localresponse.neo4j_tool.RelationshipStoreDump;
 import com.qualia.cookie.RocksCookieScan;
 import com.qualia.cookie.RocksCookieTest;
+import com.qualia.dedup_addthis.DedupAddThis;
+import com.qualia.dedup_addthis.DedupAddThisMerge;
 import com.qualia.keystore_graph.CompactRocks;
 import com.qualia.keystore_graph.DirLoader;
 import com.qualia.keystore_graph.DumpClusters;
@@ -40,6 +42,8 @@ public class Launcher {
         register(DirLoader.class);
         register(HashReport.class);
         register(DumpClusters.class);
+        register(DedupAddThis.class);
+        register(DedupAddThisMerge.class);
     }
 
 
