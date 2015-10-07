@@ -7,8 +7,6 @@ package com.localresponse.neo4j_tool;
  * 
  */
 
-import gnu.trove.map.hash.TLongLongHashMap;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,7 +40,7 @@ public class GraphCompactor {
     private final String destGraphDir;
     private final GraphDatabaseService srcDb;
     private final BatchInserter targetDb;
-    private final TLongLongHashMap nodeIdMap = new TLongLongHashMap(); // Key is the Old ID, value is the New ID
+    private final INodeIdMap nodeIdMap = new RocksNodeMap(); // Key is the Old ID, value is the New ID
 
     private static final List<String> propsToRemove = Arrays.asList("created_on", "last_seen");
 

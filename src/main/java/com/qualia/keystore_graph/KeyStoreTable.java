@@ -1,6 +1,8 @@
 package com.qualia.keystore_graph;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -81,13 +83,23 @@ public class KeyStoreTable {
 		}
 	}
 
-	public String getString(byte[] key) {
-		return null;
+	public static String getString(byte[] bytes) {
+	    throw new RuntimeException("Not Implemented");
 	}
 
-	public int getInt(byte[] key) {
-		return 0;
+	public static int getInt(byte[] bytes) {
+        throw new RuntimeException("Not Implemented");
 	}
+
+    public static long getLong(byte[] bytes) {
+        ByteArrayInputStream valStream = new ByteArrayInputStream(bytes);
+        DataInputStream ds = new DataInputStream(valStream);
+        try {
+            return ds.readLong();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 	public void flush() {
 		try {

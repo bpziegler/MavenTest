@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.localresponse.neo4j_tool.GraphCompactor;
 import com.localresponse.neo4j_tool.NodeStoreDump;
 import com.localresponse.neo4j_tool.PropertyStoreDump;
 import com.localresponse.neo4j_tool.RelationshipStoreDump;
@@ -33,6 +34,7 @@ public class Launcher {
         register(RocksCookieTest.class);
         register(RocksCookieScan.class);
         register(CompactRocks.class);
+        register(GraphCompactor.class);
         register(NodeStoreDump.class);
         register(RelationshipStoreDump.class);
         register(PropertyStoreDump.class);
