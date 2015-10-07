@@ -22,11 +22,21 @@ import com.google.common.base.Charsets;
  * as more AddThisMapping files are merged into it. Note it could be pruned by removing lines that have a timestamp > 30
  * days, etc)
  * 
- * addThisMapping file + database file => new database file + file for new mappings + file for new last_seen values The
- * database file has the mappings + tab + lastseen (timestamp). The mappings is the column with 6=1234,9=22345,1172=3223
+ * addThisMapping file + database file => new database file + file for new mappings + file for new last_seen values. 
+ * The database file has the mappings + tab + lastseen (timestamp). The mappings is the column with 6=1234,9=22345,1172=3223
  * NOTE the addThisMapping file must be pre-processed to have mapping in first column, tab, then timestamp in second
  * column. Also must be SORTED!
- *
+ * 
+ * LocalResponse cookies are ignored.
+ * 
+ * Note to preprocess the addThisMapping file, these commands can be used:
+ * # This command Moves column 3 to the front, then column 1
+ * cat "$1" | gunzip | awk '{ print $3"\t"$1 }' > mappings_"$1"
+ * # This command sorts the file
+ * java -jar ~/externalsortinginjava-0.1.10-SNAPSHOT.jar -v mappings_"$1" mappings_sorted_"$1"
+ * # This command runs the merge:
+ * java -jar ../MavenTest-0.0.1-SNAPSHOT-jar-with-dependencies.jar DedupAddThisMerge mappings_sorted_"$1"
+ * 
  */
 public class DedupAddThisMerge {
 
