@@ -15,11 +15,11 @@ import org.rocksdb.RocksIterator;
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
 
-public class ClusterThreadMgr extends PoolWorkerManager<GraphStorage, GlobalKey, Collection<GlobalKey>> {
+public class ClusterThreadMgr extends PoolWorkerManager<GraphStorage, GlobalKey, MappingResult> {
 
 	private final TLongSet visited = new TLongHashSet();
 	private final GraphStorage storage = new GraphStorage(true);
-	private Collection<GlobalKey> maxCluster = null;
+	private MappingResult maxCluster = null;
     private BufferedWriter largeClusterStreamWriter;
 
 	@Override
@@ -28,8 +28,8 @@ public class ClusterThreadMgr extends PoolWorkerManager<GraphStorage, GlobalKey,
 	}
 
 	@Override
-	public Collection<GlobalKey> transformInThread(GraphStorage storage, GlobalKey rowKey) {
-		Collection<GlobalKey> result;
+	public MappingResult transformInThread(GraphStorage storage, GlobalKey rowKey) {
+	    MappingResult result;
 		try {
 			Preconditions.checkArgNotNull(rowKey, "rowKey can't be null");
 			result = storage.getAllMappings(rowKey, 1000);
@@ -41,17 +41,17 @@ public class ClusterThreadMgr extends PoolWorkerManager<GraphStorage, GlobalKey,
 	}
 
 	@Override
-	public void consume(Collection<GlobalKey> keys) {
-		for (GlobalKey oneKey : keys) {
+	public void consume(MappingResult mappingResult) {
+		for (GlobalKey oneKey : mappingResult.allKeys) {
 			visited.add(oneKey.getHashValueAsLong());
 		}
 		//  Note we are doing ">=" so we get all clusters that are of size 1000
-		if (maxCluster == null || keys.size() >= maxCluster.size()) {
-			maxCluster = keys;
+		if (maxCluster == null || mappingResult.allKeys.size() >= maxCluster.allKeys.size()) {
+			maxCluster = mappingResult;
 			// storage.dumpCluster(maxCluster);
-			GlobalKey firstKey = maxCluster.iterator().next();
-			String id = storage.lookupId(firstKey);
-			String line = String.format("%d\t%s", maxCluster.size(), id);
+			GlobalKey mostConnectedKey = mappingResult.getMostConnectedKey();
+			String id = storage.lookupId(mostConnectedKey);
+			String line = String.format("%d\t%s", maxCluster.allKeys.size(), id);
 			try {
                 largeClusterStreamWriter.write(line);
                 largeClusterStreamWriter.newLine();
@@ -115,7 +115,7 @@ public class ClusterThreadMgr extends PoolWorkerManager<GraphStorage, GlobalKey,
 	private void dumpStats(long rowNum, long startTime, long numCluster) {
 		double elap = (0.0 + System.currentTimeMillis() - startTime) / 1000.0;
 		double rowPerSec = rowNum / elap;
-		int maxClusterSize = (maxCluster != null) ? maxCluster.size() : -1;
+		int maxClusterSize = (maxCluster != null) ? maxCluster.allKeys.size() : -1;
 		String s = String.format(
 				"Elap %,8.1f   Row %,10d   Row/Sec %,8.0f   Clusters %,8d   Visited %,8d   MaxClusSize %,4d", elap,
 				rowNum, rowPerSec, numCluster, visited.size(), maxClusterSize);

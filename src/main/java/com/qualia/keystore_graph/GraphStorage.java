@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +26,7 @@ public class GraphStorage implements Closeable {
     private final KeyStoreTable propertyTable;
     private final KeyStoreTable hashLookupTable;
     private final KeyStoreTable ipMappingTable;
-	private final KeyStoreTable fileSaveTable;
+    private final KeyStoreTable fileSaveTable;
 
 
     public GraphStorage(boolean readOnly) {
@@ -34,8 +35,8 @@ public class GraphStorage implements Closeable {
         hashLookupTable = new KeyStoreTable("hash_lookup", true, readOnly);
         ipMappingTable = new KeyStoreTable("ip_mapping", true, readOnly);
         fileSaveTable = new KeyStoreTable("file_save", true, readOnly);
-        // We want this to update immediately.  Its low volume so its OK.
-         fileSaveTable.setWriteToWAL(true);
+        // We want this to update immediately. Its low volume so its OK.
+        fileSaveTable.setWriteToWAL(true);
     }
 
 
@@ -66,11 +67,14 @@ public class GraphStorage implements Closeable {
     }
 
 
-    public Collection<GlobalKey> getAllMappings(GlobalKey rootKey) {
-    	return getAllMappings(rootKey, MAX_MAPPINGS_PER_KEY);
+    public MappingResult getAllMappings(GlobalKey rootKey) {
+        return getAllMappings(rootKey, MAX_MAPPINGS_PER_KEY);
     }
-    
-    public Collection<GlobalKey> getAllMappings(GlobalKey rootKey, int maxMappings) {
+
+
+    public MappingResult getAllMappings(GlobalKey rootKey, int maxMappings) {
+        Map<GlobalKey, Collection<GlobalKey>> allDirectMappings = new HashMap<GlobalKey, Collection<GlobalKey>>();
+
         Set<GlobalKey> followedKeys = new HashSet<GlobalKey>();
         Set<GlobalKey> unFollowedKeys = new HashSet<GlobalKey>();
         unFollowedKeys.add(rootKey);
@@ -78,6 +82,7 @@ public class GraphStorage implements Closeable {
         while (unFollowedKeys.size() > 0) {
             GlobalKey srcKey = unFollowedKeys.iterator().next();
             List<GlobalKey> directMappings = getDirectMappings(srcKey, maxMappings);
+            allDirectMappings.put(srcKey, directMappings);
             unFollowedKeys.remove(srcKey);
             followedKeys.add(srcKey);
             for (GlobalKey foundKey : directMappings) {
@@ -90,7 +95,7 @@ public class GraphStorage implements Closeable {
             }
         }
 
-        return followedKeys;
+        return new MappingResult(followedKeys, allDirectMappings);
     }
 
 
@@ -141,7 +146,7 @@ public class GraphStorage implements Closeable {
             ByteArrayOutputStream bs = new ByteArrayOutputStream();
             bs.write(globalKey.getHashValue());
             bs.write(KeyStoreTable.getBytesForValue(packedIPAddress));
-            // Note - we could also include lastSeen in the key.  Would take
+            // Note - we could also include lastSeen in the key. Would take
             // more storage, but allow us to get a count.
 
             ipMappingTable.put(bs.toByteArray(), KeyStoreTable.getBytesForValue(lastSeen));
@@ -162,41 +167,43 @@ public class GraphStorage implements Closeable {
             throw new RuntimeException(e);
         }
     }
-    
+
+
     public void saveLoadFileProperty(String loadedFileName, String propName, Object value) {
         try {
-        	String key = loadedFileName + "\t" + propName;
-        	fileSaveTable.putNoBatch(key.getBytes(Charsets.UTF_8), value);
-		} catch (RocksDBException e) {
+            String key = loadedFileName + "\t" + propName;
+            fileSaveTable.putNoBatch(key.getBytes(Charsets.UTF_8), value);
+        } catch (RocksDBException e) {
             throw new RuntimeException(e);
-		}
+        }
     }
-    
+
+
     public String lookupId(final GlobalKey globalKey) {
-    	final List<String> ids = new ArrayList<String>();
-    	
-    	hashLookupTable.scan(globalKey.getHashValue(), new IScanCallback() {
-			@Override
-			public boolean onRow(byte[] key, byte[] value) {
+        final List<String> ids = new ArrayList<String>();
+
+        hashLookupTable.scan(globalKey.getHashValue(), new IScanCallback() {
+            @Override
+            public boolean onRow(byte[] key, byte[] value) {
                 byte[] tmp = new byte[GlobalKey.KEY_LENGTH];
                 System.arraycopy(key, 0, tmp, 0, GlobalKey.KEY_LENGTH);
                 GlobalKey destKey = GlobalKey.createFromBytes(tmp);
-                
+
                 if (destKey.equals(globalKey)) {
-                	String id = new String(key, GlobalKey.KEY_LENGTH, key.length - GlobalKey.KEY_LENGTH, Charsets.UTF_8);
-                	ids.add(id);
-                	return true;
+                    String id = new String(key, GlobalKey.KEY_LENGTH, key.length - GlobalKey.KEY_LENGTH, Charsets.UTF_8);
+                    ids.add(id);
+                    return true;
                 } else {
-                	return false;
+                    return false;
                 }
-			}
-		});
-    	
-    	// Should we even bother reporting if ids.size > 1?
-    	
-    	String result = (ids.size() > 0) ? ids.get(0) : null;
-    	
-    	return result;
+            }
+        });
+
+        // Should we even bother reporting if ids.size > 1?
+
+        String result = (ids.size() > 0) ? ids.get(0) : null;
+
+        return result;
     }
 
 
@@ -209,19 +216,20 @@ public class GraphStorage implements Closeable {
     }
 
 
-	public void dumpCluster(Collection<GlobalKey> cluster) {
-		List<String> ids = new ArrayList<String>();
-		for (GlobalKey key : cluster) {
-			String id = this.lookupId(key);
-			ids.add(id);
-		}
-		Collections.sort(ids);
-		int i = 0;
-		for (String id : ids) {
-			i++;
-			System.out.println(String.format("%4d of %4d   %s", i, cluster.size(), id));
-		}
-	}
+    public void dumpCluster(Collection<GlobalKey> cluster) {
+        List<String> ids = new ArrayList<String>();
+        for (GlobalKey key : cluster) {
+            String id = this.lookupId(key);
+            ids.add(id);
+        }
+        Collections.sort(ids);
+        int i = 0;
+        for (String id : ids) {
+            i++;
+            System.out.println(String.format("%4d of %4d   %s", i, cluster.size(), id));
+        }
+    }
+
 
     private void saveMappingPair(GlobalKey key1, GlobalKey key2) {
         try {
