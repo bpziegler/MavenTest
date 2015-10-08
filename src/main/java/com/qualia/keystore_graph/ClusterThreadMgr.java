@@ -50,8 +50,9 @@ public class ClusterThreadMgr extends PoolWorkerManager<GraphStorage, GlobalKey,
 			maxCluster = mappingResult;
 			// storage.dumpCluster(maxCluster);
 			GlobalKey mostConnectedKey = mappingResult.getMostConnectedKey();
+			int oneKeySize = mappingResult.directMappings.get(mostConnectedKey).size();
 			String id = storage.lookupId(mostConnectedKey);
-			String line = String.format("%d\t%s", maxCluster.allKeys.size(), id);
+			String line = String.format("%d\t%s\t%d", maxCluster.allKeys.size(), id, oneKeySize);
 			try {
                 largeClusterStreamWriter.write(line);
                 largeClusterStreamWriter.newLine();
