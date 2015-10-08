@@ -48,13 +48,14 @@ public class ClusterThreadMgr extends PoolWorkerManager<GraphStorage, GlobalKey,
 		//  Note we are doing ">=" so we get all clusters that are of size 1000
 		if (maxCluster == null || keys.size() >= maxCluster.size()) {
 			maxCluster = keys;
-			storage.dumpCluster(maxCluster);
+			// storage.dumpCluster(maxCluster);
 			GlobalKey firstKey = maxCluster.iterator().next();
 			String id = storage.lookupId(firstKey);
 			String line = String.format("%d\t%s", maxCluster.size(), id);
 			try {
                 largeClusterStreamWriter.write(line);
                 largeClusterStreamWriter.newLine();
+                largeClusterStreamWriter.flush();
             } catch (IOException e) {
                 e.printStackTrace();
                 throw new RuntimeException(e);
