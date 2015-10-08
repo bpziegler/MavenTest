@@ -1,10 +1,9 @@
 package com.qualia.keystore_graph;
 
-import org.rocksdb.RocksDBException;
 
 public class DumpClusters {
 
-	public static void main(String[] args) throws RocksDBException, InterruptedException {
+	public static void main(String[] args) throws Exception {
 		
 		ClusterThreadMgr mgr = new ClusterThreadMgr();
 		mgr.run();

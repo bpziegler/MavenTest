@@ -1,5 +1,10 @@
 package com.qualia.keystore_graph;
 
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.Collection;
 
 import org.parboiled.common.Preconditions;
@@ -15,6 +20,7 @@ public class ClusterThreadMgr extends PoolWorkerManager<GraphStorage, GlobalKey,
 	private final TLongSet visited = new TLongHashSet();
 	private final GraphStorage storage = new GraphStorage(true);
 	private Collection<GlobalKey> maxCluster = null;
+    private BufferedWriter largeClusterStreamWriter;
 
 	@Override
 	public GraphStorage createContext() {
@@ -39,14 +45,29 @@ public class ClusterThreadMgr extends PoolWorkerManager<GraphStorage, GlobalKey,
 		for (GlobalKey oneKey : keys) {
 			visited.add(oneKey.getHashValueAsLong());
 		}
-		if (maxCluster == null || keys.size() > maxCluster.size()) {
+		//  Note we are doing ">=" so we get all clusters that are of size 1000
+		if (maxCluster == null || keys.size() >= maxCluster.size()) {
 			maxCluster = keys;
 			storage.dumpCluster(maxCluster);
+			GlobalKey firstKey = maxCluster.iterator().next();
+			String id = storage.lookupId(firstKey);
+			String line = String.format("%d\t%s", maxCluster.size(), id);
+			try {
+                largeClusterStreamWriter.write(line);
+                largeClusterStreamWriter.newLine();
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
 		}
 	}
 
-	public void run() throws InterruptedException, RocksDBException {
+	public void run() throws InterruptedException, RocksDBException, IOException {
 		start(5);
+		
+		FileOutputStream fs = new FileOutputStream("large_clusters.log");
+		OutputStreamWriter osw = new OutputStreamWriter(fs);
+		largeClusterStreamWriter = new BufferedWriter(osw);
 
 		RocksDB db = RocksDB.openReadOnly("test-db/hash_lookup");
 
@@ -87,7 +108,7 @@ public class ClusterThreadMgr extends PoolWorkerManager<GraphStorage, GlobalKey,
 		storage.close();
 		db.close();
 		db.dispose();
-
+		largeClusterStreamWriter.close();
 	}
 
 	private void dumpStats(long rowNum, long startTime, long numCluster) {
