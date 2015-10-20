@@ -75,7 +75,10 @@ public class NodeStoreDump {
     private void dumpRecord(BufferedWriter bw, NodeStore store, NodeRecord record) throws IOException {
         NodeLabels labels = NodeLabelsField.parseLabelsField(record);
         long[] labelIds = labels.getIfLoaded();
-        String label = labelMap.get((int) labelIds[0]);
+        String label = "null";
+        if (labelIds.length > 0) {
+        	label = labelMap.get((int) labelIds[0]);
+        }
         String line = String.format("%d,%s,%d\n", record.getId(), label, record.getNextProp());
         bw.write(line);
     }
