@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.localresponse.neo4j_tool.GraphCompactor;
+import com.localresponse.neo4j_tool.Neo4jStoreStats;
 import com.localresponse.neo4j_tool.NodeStoreDump;
 import com.localresponse.neo4j_tool.PropertyStoreDump;
 import com.localresponse.neo4j_tool.RelationshipStoreDump;
@@ -46,6 +47,7 @@ public class Launcher {
         register(DumpClusters.class);
         register(DedupAddThis.class);
         register(DedupAddThisMerge.class);
+        register(Neo4jStoreStats.class);
     }
 
 
