@@ -22,6 +22,7 @@ import com.qualia.keystore_graph.GraphStorageTest;
 import com.qualia.keystore_graph.HashReport;
 import com.qualia.keystore_graph.KeyStoreAddThisMappingLoader;
 import com.qualia.test.JettyTest;
+import com.qualia.test.SkipTool;
 import com.qualia.util.UniqueLines;
 
 
@@ -48,6 +49,7 @@ public class Launcher {
         register(DedupAddThis.class);
         register(DedupAddThisMerge.class);
         register(Neo4jStoreStats.class);
+        register(SkipTool.class);
     }
 
 
