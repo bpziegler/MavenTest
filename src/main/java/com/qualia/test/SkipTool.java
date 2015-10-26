@@ -21,6 +21,10 @@ public class SkipTool {
     private final String skipFile;
     private final String outputFile;
 
+    private long onlyLeft = 0;
+    private long onlyRight = 0;
+    private long both = 0;
+
 
     public SkipTool(String checkFile, String skipFile, String outputFile) {
         this.checkFile = checkFile;
@@ -37,6 +41,9 @@ public class SkipTool {
         OutputStreamWriter osw = new OutputStreamWriter(fs, Charsets.UTF_8);
         BufferedWriter bw = new BufferedWriter(osw);
 
+        long startTime = System.currentTimeMillis();
+        long lastLog = System.currentTimeMillis();
+
         while (true) {
             if ((checkSortedFile.getLastLine() == null) && (skipSortedFile.getLastLine() == null)) {
                 break;
@@ -49,15 +56,32 @@ public class SkipTool {
                 bw.write(checkSortedFile.getLastLine());
                 bw.newLine();
                 checkSortedFile.moveNextLine();
+                onlyLeft++;
             } else if (compare > 0) {
                 skipSortedFile.moveNextLine();
+                onlyRight++;
             } else {
                 checkSortedFile.moveNextLine();
                 skipSortedFile.moveNextLine();
+                both++;
+            }
+
+            if (System.currentTimeMillis() - lastLog >= 1000) {
+                lastLog = System.currentTimeMillis();
+                dumpStats(startTime);
             }
         }
 
         bw.close();
+
+        dumpStats(startTime);
+    }
+
+
+    private void dumpStats(long startTime) {
+        double elap = (System.currentTimeMillis() - startTime + 0.0) / 1000;
+        System.out.println(String.format("Elap %9.2f   Left %15,d   Right %15,d   Both %15,d", elap, onlyLeft,
+                onlyRight, both));
     }
 
 
