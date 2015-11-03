@@ -15,6 +15,7 @@ import com.qualia.cookie.RocksCookieScan;
 import com.qualia.cookie.RocksCookieTest;
 import com.qualia.dedup_addthis.DedupAddThis;
 import com.qualia.dedup_addthis.DedupAddThisMerge;
+import com.qualia.dumploader.Neo4jDumpLoader;
 import com.qualia.keystore_graph.CompactRocks;
 import com.qualia.keystore_graph.DirLoader;
 import com.qualia.keystore_graph.DumpClusters;
@@ -50,6 +51,7 @@ public class Launcher {
         register(DedupAddThisMerge.class);
         register(Neo4jStoreStats.class);
         register(SkipTool.class);
+        register(Neo4jDumpLoader.class);
     }
 
 

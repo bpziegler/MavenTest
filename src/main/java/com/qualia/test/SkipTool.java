@@ -80,7 +80,7 @@ public class SkipTool {
 
     private void dumpStats(long startTime) {
         double elap = (System.currentTimeMillis() - startTime + 0.0) / 1000;
-        System.out.println(String.format("Elap %9.2f   Left %15,d   Right %15,d   Both %15,d", elap, onlyLeft,
+        System.out.println(String.format("Elap %9.2f   Left %,15d   Right %,15d   Both %,15d", elap, onlyLeft,
                 onlyRight, both));
     }
 
