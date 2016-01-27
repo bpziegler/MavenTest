@@ -7,7 +7,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
@@ -31,8 +31,8 @@ public class MultiFileLineProcessor {
 
 
     public void processDir(String dirPath, ILineProcessor lineProcessor) throws IOException {
-        File dir = new File(dirPath);
-        List<File> fileList = Arrays.asList(dir.listFiles());
+        List<File> fileList = new ArrayList<File>();
+        FileRecur.getFilesInDirRecursively(dirPath, fileList);
         processFiles(fileList, lineProcessor);
     }
 
