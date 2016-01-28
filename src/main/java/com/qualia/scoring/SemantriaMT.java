@@ -25,7 +25,7 @@ public class SemantriaMT {
 
         int cores = Runtime.getRuntime().availableProcessors();
         final ExecutorService executor = Executors.newFixedThreadPool(cores);
-        final BlockingQueue<Object> queue = new ArrayBlockingQueue<Object>(1000);
+        final BlockingQueue<Object> queue = new ArrayBlockingQueue<Object>(5 * 1000);
 
         List<File> files = new ArrayList<File>();
         FileRecur.getFilesInDirRecursively(dirPath, files);

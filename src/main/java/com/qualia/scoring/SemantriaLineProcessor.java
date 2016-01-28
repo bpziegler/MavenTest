@@ -32,12 +32,14 @@ public class SemantriaLineProcessor implements Runnable {
                     break;
                 }
                 Object obj = queue.poll(1, TimeUnit.MILLISECONDS);
-                if (obj instanceof SemantriaLine) {
-                    SemantriaLine line = (SemantriaLine) obj;
-                    line.getLabelNames();
-                    byte[] key = KeyStoreTable.getBytesForValue(line.getUrl());
-                    String value = mapper.writeValueAsString(line.getLabelNames());
-                    urlTopicsTable.put(key, value);
+                if (obj instanceof SemantriaLineBatch) {
+                    SemantriaLineBatch batch = (SemantriaLineBatch) obj;
+                    for (SemantriaLine line : batch) {
+                        line.getLabelNames();
+                        byte[] key = KeyStoreTable.getBytesForValue(line.getUrl());
+                        String value = mapper.writeValueAsString(line.getLabelNames());
+                        urlTopicsTable.put(key, value);
+                    }
                 }
             }
         } catch (Exception e) {

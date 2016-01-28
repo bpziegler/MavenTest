@@ -23,15 +23,16 @@ public class ParseSemantriaThread implements Runnable {
 
     private static final int STATUS_LINES_SIZE = 100;
 
+    private static final int SEMANTRIA_LINE_BATCH_SIZE = 100;
+
     private final String filePath;
     private final BlockingQueue<Object> queue;
     private final ObjectMapper mapper = new ObjectMapper();
     private final Status status;
 
+    private SemantriaLineBatch semantriaLineBatch = new SemantriaLineBatch();
     private int numLines;
-
     private long lastCount;
-
     private long numBytes;
 
 
@@ -96,7 +97,12 @@ public class ParseSemantriaThread implements Runnable {
         }
 
         SemantriaLine semantriaLine = new SemantriaLine(url, id, labelNames);
-        queue.put(semantriaLine);
+        semantriaLineBatch.add(semantriaLine);
+
+        if (semantriaLineBatch.size() >= SEMANTRIA_LINE_BATCH_SIZE) {
+            queue.put(semantriaLineBatch);
+            semantriaLineBatch = new SemantriaLineBatch();
+        }
     }
 
 
@@ -104,6 +110,11 @@ public class ParseSemantriaThread implements Runnable {
     public void run() {
         try {
             safeRun();
+
+            if (semantriaLineBatch.size() > 0) {
+                queue.put(semantriaLineBatch);
+                semantriaLineBatch = new SemantriaLineBatch();
+            }
 
             status.numFiles.incrementAndGet();
             status.numLines.addAndGet(numLines);
