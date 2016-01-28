@@ -100,16 +100,16 @@ public class AnalyzeSemantria {
 
         URI uri = new URI(url);
         String host = uri.getHost();
-        List<String> parts = new ArrayList<String>(dotSplitter.splitToList(host));
-        while (parts.size() > 2) {
-            parts.remove(0);
-        }
-        String normalHost = dotJoiner.join(parts);
+//        List<String> parts = new ArrayList<String>(dotSplitter.splitToList(host));
+//        while (parts.size() > 2) {
+//            parts.remove(0);
+//        }
+//        String normalHost = dotJoiner.join(parts);
 
-        ProcessedStats stats = urlStatsMap.get(normalHost);
+        ProcessedStats stats = urlStatsMap.get(host);
         if (stats == null) {
             stats = new ProcessedStats();
-            urlStatsMap.put(normalHost, stats);
+            urlStatsMap.put(host, stats);
         }
         boolean valid = (topics != null) && (topics.size() > 0) && (status.equals("PROCESSED"));
         if (valid) {
