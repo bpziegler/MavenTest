@@ -21,10 +21,18 @@ import com.qualia.keystore_graph.Status;
 
 public class ParseSemantriaThread implements Runnable {
 
+    private static final int STATUS_LINES_SIZE = 100;
+
     private final String filePath;
     private final BlockingQueue<Object> queue;
     private final ObjectMapper mapper = new ObjectMapper();
     private final Status status;
+
+    private int numLines;
+
+    private long lastCount;
+
+    private long numBytes;
 
 
     public ParseSemantriaThread(String filePath, BlockingQueue<Object> queue, Status status) {
@@ -46,6 +54,17 @@ public class ParseSemantriaThread implements Runnable {
 
         while ((line = br.readLine()) != null) {
             processLine(line);
+
+            long curBytes = cs.getCount() - lastCount;
+            lastCount = cs.getCount();
+            numBytes += curBytes;
+            numLines++;
+            if (numLines >= STATUS_LINES_SIZE) {
+                status.numLines.addAndGet(numLines);
+                status.numBytes.addAndGet(numBytes);
+                numLines = 0;
+                numBytes = 0;
+            }
         }
 
         br.close();
@@ -56,7 +75,7 @@ public class ParseSemantriaThread implements Runnable {
         JsonNode jsonTree = mapper.readTree(line);
         String id = jsonTree.get("id").asText();
         String url = jsonTree.get("url").asText();
-        String status = jsonTree.get("status").asText();
+        String jobStatus = jsonTree.get("status").asText();
         ArrayNode topics = (ArrayNode) jsonTree.get("topics");
         if (id == null)
             return;
@@ -64,7 +83,7 @@ public class ParseSemantriaThread implements Runnable {
             return;
         if (status == null)
             return;
-        if (!status.equals("PROCESSED"))
+        if (!jobStatus.equals("PROCESSED"))
             return;
         if (topics == null)
             return;
@@ -76,7 +95,7 @@ public class ParseSemantriaThread implements Runnable {
             labelNames.add(topicNode.get("title").asText());
         }
 
-        SemantriaLine semantriaLine = new SemantriaLine(url, labelNames);
+        SemantriaLine semantriaLine = new SemantriaLine(url, id, labelNames);
         queue.put(semantriaLine);
     }
 
@@ -85,12 +104,14 @@ public class ParseSemantriaThread implements Runnable {
     public void run() {
         try {
             safeRun();
+
+            status.numFiles.incrementAndGet();
+            status.numLines.addAndGet(numLines);
+            status.numBytes.addAndGet(numBytes);
         } catch (IOException e) {
-            // TODO:  Output an error somewhere
-            e.printStackTrace();
+            status.numErrors.incrementAndGet();
         } catch (InterruptedException e) {
-            // TODO:  Output an error somewhere
-            e.printStackTrace();
+            status.numErrors.incrementAndGet();
         }
     }
 

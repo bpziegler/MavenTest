@@ -43,6 +43,10 @@ public class SemantriaMT {
         StatusThread statusThread = new StatusThread(status);
         statusThread.start();
 
+        SemantriaLineProcessor lineProcessor = new SemantriaLineProcessor(queue);
+        Thread lineProcessorThread = new Thread(lineProcessor);
+        lineProcessorThread.start();
+
         for (File oneFile : files) {
             ParseSemantriaThread thread = new ParseSemantriaThread(oneFile.getAbsolutePath(), queue, status);
             executor.submit(thread);
@@ -50,6 +54,11 @@ public class SemantriaMT {
 
         executor.shutdown();
         executor.awaitTermination(1, TimeUnit.DAYS);
+
+        System.out.println("Waiting for threads at " + DateTime.now());
+
+        lineProcessor.doneFlag.set(true);
+        lineProcessorThread.join();
 
         statusThread.done.set(true);
         statusThread.join();
