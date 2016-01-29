@@ -147,4 +147,8 @@ public class KeyStoreTable {
 		this.writeToWAL = writeToWAL;
 	}
 
+    public RocksDB getDb() {
+        return db;
+    }
+
 }

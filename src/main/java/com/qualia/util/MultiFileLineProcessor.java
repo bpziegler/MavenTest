@@ -28,6 +28,7 @@ public class MultiFileLineProcessor {
     private long startTime;
     private long totLines;
     private boolean useGzip;
+    private long lastLog;
 
 
     public void processDir(String dirPath, ILineProcessor lineProcessor) throws IOException {
@@ -65,14 +66,16 @@ public class MultiFileLineProcessor {
         FileInputStream fs = new FileInputStream(oneFile);
         CountingInputStream cs = new CountingInputStream(fs);
         InputStream nextStream = cs;
-        if (isUseGzip()) {
+        if (isUseGzip() && oneFile.getName().endsWith(".gz")) {
             nextStream = new GZIPInputStream(nextStream);
         }
         InputStreamReader isr = new InputStreamReader(nextStream);
         BufferedReader br = new BufferedReader(isr, 256 * 1024);
 
         String line;
-        long lastLog = System.currentTimeMillis();
+        if (lastLog == 0) {
+            lastLog = System.currentTimeMillis();
+        }
         long curLine = 0;
 
         while ((line = br.readLine()) != null) {
