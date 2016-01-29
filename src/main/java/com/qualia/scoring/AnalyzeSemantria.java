@@ -33,6 +33,7 @@ public class AnalyzeSemantria {
     private Map<String, ProcessedStats> urlStatsMap = new HashMap<String, ProcessedStats>();
     private Splitter dotSplitter = Splitter.on(".");
     private Joiner dotJoiner = Joiner.on(".");
+    private final MD5Helper md5Helper = new MD5Helper();
 
     public static class ProcessedStats {
         int numProcessed;
@@ -98,25 +99,30 @@ public class AnalyzeSemantria {
             totTopics += topics.size();
         }
 
-        URI uri = new URI(url);
-        String host = uri.getHost();
-//        List<String> parts = new ArrayList<String>(dotSplitter.splitToList(host));
-//        while (parts.size() > 2) {
-//            parts.remove(0);
-//        }
-//        String normalHost = dotJoiner.join(parts);
+        String testId = md5Helper.stringToMD5Hex(url);
+        if (!id.equals(testId)) {
+            System.out.println("mismatch:  id=" + id + "  testId=" + testId);
+        }
 
-        ProcessedStats stats = urlStatsMap.get(host);
-        if (stats == null) {
-            stats = new ProcessedStats();
-            urlStatsMap.put(host, stats);
-        }
-        boolean valid = (topics != null) && (topics.size() > 0) && (status.equals("PROCESSED"));
-        if (valid) {
-            stats.numProcessed++;
-        } else {
-            stats.numFailed++;
-        }
+//        URI uri = new URI(url);
+//        String host = uri.getHost();
+        // List<String> parts = new ArrayList<String>(dotSplitter.splitToList(host));
+        // while (parts.size() > 2) {
+        // parts.remove(0);
+        // }
+        // String normalHost = dotJoiner.join(parts);
+
+//        ProcessedStats stats = urlStatsMap.get(host);
+//        if (stats == null) {
+//            stats = new ProcessedStats();
+//            urlStatsMap.put(host, stats);
+//        }
+//        boolean valid = (topics != null) && (topics.size() > 0) && (status.equals("PROCESSED"));
+//        if (valid) {
+//            stats.numProcessed++;
+//        } else {
+//            stats.numFailed++;
+//        }
     }
 
 
