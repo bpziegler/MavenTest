@@ -23,6 +23,7 @@ import com.qualia.keystore_graph.GraphStorageTest;
 import com.qualia.keystore_graph.HashReport;
 import com.qualia.keystore_graph.KeyStoreAddThisMappingLoader;
 import com.qualia.scoring.AnalyzeSemantria;
+import com.qualia.scoring.ProcessAddThis;
 import com.qualia.scoring.SemantriaMT;
 import com.qualia.test.JettyTest;
 import com.qualia.test.SkipTool;
@@ -56,6 +57,7 @@ public class Launcher {
         register(Neo4jDumpLoader.class);
         register(AnalyzeSemantria.class);
         register(SemantriaMT.class);
+        register(ProcessAddThis.class);
     }
 
 
