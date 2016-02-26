@@ -7,6 +7,8 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import com.qualia.scoring.MD5Helper;
+
 
 public class JsonSpeedTest {
 
@@ -18,7 +20,7 @@ public class JsonSpeedTest {
 
         long startTime0 = System.nanoTime();
 
-        for (int i = 0; i < 10*1000; i++) {
+        for (int i = 0; i < 10 * 1000; i++) {
             try {
                 JsonNode obj = mapper.readTree(s);
             } catch (JsonProcessingException e) {
@@ -31,10 +33,12 @@ public class JsonSpeedTest {
 
         long startTime = System.nanoTime();
 
+        MD5Helper helper = new MD5Helper();
+
         for (int i = 0; i < NUM; i++) {
             try {
                 mapper.readTree(s);
-                // s = "hello";
+                // s = helper.stringToMD5Hex(String.valueOf(i));
             } catch (Exception e) {
             }
         }
