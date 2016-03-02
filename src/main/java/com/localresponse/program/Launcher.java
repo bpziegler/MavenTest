@@ -25,6 +25,7 @@ import com.qualia.keystore_graph.KeyStoreAddThisMappingLoader;
 import com.qualia.scoring.AnalyzeSemantria;
 import com.qualia.scoring.SemantriaMT;
 import com.qualia.test.JettyTest;
+import com.qualia.test.RocksScan;
 import com.qualia.test.SkipTool;
 import com.qualia.util.UniqueLines;
 
@@ -56,6 +57,7 @@ public class Launcher {
         register(Neo4jDumpLoader.class);
         register(AnalyzeSemantria.class);
         register(SemantriaMT.class);
+        register(RocksScan.class);
     }
 
 

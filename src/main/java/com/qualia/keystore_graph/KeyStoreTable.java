@@ -26,7 +26,7 @@ public class KeyStoreTable {
 	private boolean writeToWAL = DEFAULT_WRITE_TO_WAL;
 
 	public KeyStoreTable(String tableName, boolean compress, boolean readOnly) {
-		File dir = new File("test-db", tableName);
+		File dir = new File(tableName);
 		try {
 			this.db = Database.getDb(dir.getAbsolutePath(), compress, readOnly);
 		} catch (RocksDBException e) {
