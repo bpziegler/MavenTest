@@ -1,9 +1,13 @@
 package com.qualia.scoring;
 
 
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.List;
 
+import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ArrayNode;
@@ -24,9 +28,13 @@ public class ProcessAddThis {
     private final KeyStoreTable urlTopicsTable = new KeyStoreTable("url_topics", true, false);
     private long numMatch;
     private long numMiss;
+    private BufferedWriter bw;
 
 
     private void run(String dirPath) throws IOException {
+        FileOutputStream fs = new FileOutputStream("joined_addthis_events.txt");
+        OutputStreamWriter osw = new OutputStreamWriter(fs, Charsets.UTF_8);
+        bw = new BufferedWriter(osw);
 
         MultiFileLineProcessor lineProcessor = new MultiFileLineProcessor();
         lineProcessor.setUseGzip(true);
@@ -46,6 +54,8 @@ public class ProcessAddThis {
                 return String.format("match %,d   miss %,d", numMatch, numMiss);
             }
         });
+
+        bw.close();
     }
 
 
@@ -54,12 +64,16 @@ public class ProcessAddThis {
         String guid = parts.get(0);
         String url = parts.get(5);
         String id = md5Helper.stringToMD5Hex(url);
-        byte[] keyBytes = KeyStoreTable.getBytesForValue(id);
+        byte[] keyBytes = KeyStoreTable.getBytesForValue(url);          // Would be more efficient to use id!!!
         byte[] valBytes = urlTopicsTable.getDb().get(keyBytes);
         if (valBytes != null) {
             String valStr = new String(valBytes, Charsets.UTF_8);
             ArrayNode labelArray = (ArrayNode) mapper.readTree(valStr);
-            System.out.println(guid + "   " + labelArray.toString());
+            for (JsonNode labelNode : labelArray) {
+                String output = String.format("%s\t%s", guid, labelNode.asText());
+                bw.write(output);
+                bw.newLine();
+            }
             numMatch++;
         } else {
             numMiss++;
