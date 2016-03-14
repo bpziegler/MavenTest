@@ -61,16 +61,16 @@ public class ProcessAddThis {
 
     protected void processLine(String line, long curLine) throws RocksDBException, JsonProcessingException, IOException {
         List<String> parts = tabSplitter.splitToList(line);
-        String guid = parts.get(0);
+        // String guid = parts.get(0);
         String url = parts.get(5);
-        String id = md5Helper.stringToMD5Hex(url);
+        // String id = md5Helper.stringToMD5Hex(url);
         byte[] keyBytes = KeyStoreTable.getBytesForValue(url);          // Would be more efficient to use id!!!
         byte[] valBytes = urlTopicsTable.getDb().get(keyBytes);
         if (valBytes != null) {
             String valStr = new String(valBytes, Charsets.UTF_8);
             ArrayNode labelArray = (ArrayNode) mapper.readTree(valStr);
             for (JsonNode labelNode : labelArray) {
-                String output = String.format("%s\t%s", guid, labelNode.asText());
+                String output = String.format("%s\t%s", labelNode.asText(), line);
                 bw.write(output);
                 bw.newLine();
             }
