@@ -29,6 +29,7 @@ public class MultiFileLineProcessor {
     private long totLines;
     private boolean useGzip;
     private long lastLog;
+    private int numError;
 
 
     public void processDir(String dirPath, ILineProcessor lineProcessor) throws IOException {
@@ -43,6 +44,7 @@ public class MultiFileLineProcessor {
         totBytes = 0;
         totLines = 0;
         completedFileBytes = 0;
+        numError = 0;
         startTime = System.currentTimeMillis();
 
         // First get the total size of all files to process
@@ -54,7 +56,11 @@ public class MultiFileLineProcessor {
         int fileNum = 0;
         for (File oneFile : files) {
             fileNum++;
-            processFile(oneFile, fileNum);
+            try {
+                processFile(oneFile, fileNum);
+            } catch (Exception e) {
+                numError += 1;
+            }
             completedFileBytes += oneFile.length();
         }
     }
@@ -93,12 +99,13 @@ public class MultiFileLineProcessor {
                 double curRate = (elapSec > 0) ? curBytes / elapSec : 0;
                 double remainTime = (curRate > 0) ? (totBytes - curBytes) / curRate : 0;
                 double linesPerSec = (0.0 + totLines) / elapSec;
+                String elapStr = DurationFormatUtils.formatDuration((long) elapSec * 1000, "H:mm:ss");
                 String durStr = DurationFormatUtils.formatDuration((long) remainTime * 1000, "H:mm:ss");
                 String extraStatus = lineProcessor.getStatus();
 
                 String status = String.format(
-                        "File %2d   Line %,12d   Elap %,8.1f   Remain %8s   %7.3f %%   MB %,8d   Line/Sec %,8.0f   %s",
-                        fileNum, totLines, elapSec, durStr, 100.0 * curBytes / totBytes, usedMB, linesPerSec,
+                        "File %2d   Line %,12d   Elap %8s   Remain %8s   %7.3f %%   MB %,8d   Err %,4d   Line/Sec %,8.0f   %s",
+                        fileNum, totLines, elapStr, durStr, 100.0 * curBytes / totBytes, usedMB, numError, linesPerSec,
                         extraStatus);
 
                 System.out.println(status);
