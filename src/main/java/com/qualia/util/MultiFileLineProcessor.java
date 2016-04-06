@@ -60,6 +60,7 @@ public class MultiFileLineProcessor {
                 processFile(oneFile, fileNum);
             } catch (Exception e) {
                 numError += 1;
+                e.printStackTrace();
             }
             completedFileBytes += oneFile.length();
         }
