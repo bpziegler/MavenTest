@@ -1,16 +1,11 @@
 package com.qualia.keystore_graph;
 
-
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
 import java.util.Arrays;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
-
 
 public class GlobalKey {
 
@@ -25,18 +20,17 @@ public class GlobalKey {
     // GlobalKeyType)
     private final byte[] hashValue;
     private final int fastJavaHashCode;
-
+    public final long fastLong;
 
     public static GlobalKey createFromPidUid(String pid, String uid) {
         byte[] srcBytes = hashFunction.hashString(pid + "_" + uid, Charsets.UTF_8).asBytes();
         byte[] hashValue = new byte[KEY_LENGTH];
         System.arraycopy(srcBytes, 0, hashValue, 0, KEY_LENGTH);
-        GlobalKey result = new GlobalKey(hashValue);
         GlobalKeyType keyType = GlobalKeyType.fromPid(pid);
         embedKeyTypeInHash(hashValue, keyType);
+        GlobalKey result = new GlobalKey(hashValue);
         return result;
     }
-
 
     public static GlobalKey createFromDevice(DeviceTypes deviceType, String id) {
         byte[] hashValue = hashFunction.hashString(deviceType.toString() + "_" + id, Charsets.UTF_8).asBytes();
@@ -46,63 +40,50 @@ public class GlobalKey {
         return result;
     }
 
-
     public static GlobalKey createFromBytes(byte[] bytes) {
         GlobalKey result = new GlobalKey(bytes);
         return result;
     }
 
-
     private static void embedKeyTypeInHash(byte[] hashValue, GlobalKeyType keyType) {
         byte b1 = hashValue[0];
         b1 &= CLEAR_BIT_MASK;
-        Preconditions.checkState(keyType.ordinal() <= 15,
-                "keyType ordinal can not be >15.  Would need to resize the bitmask");
+        Preconditions.checkState(keyType.ordinal() <= 15, "keyType ordinal can not be >15.  Would need to resize the bitmask");
         b1 |= (byte) keyType.ordinal();
         hashValue[0] = b1;
     }
 
-
     private GlobalKey(byte[] hashValue) {
         this.hashValue = hashValue;
-        this.fastJavaHashCode = calcFastHashCode(); 
+        this.fastJavaHashCode = calcFastHashCode();
+        this.fastLong = getHashValueAsLong();
     }
-
 
     public byte[] getHashValue() {
         return hashValue.clone(); // This is slow but ensures our copy never gets modified
     }
 
-
     public long getHashValueAsLong() {
-    	ByteArrayInputStream bs = new ByteArrayInputStream(hashValue);
-    	DataInputStream ds = new DataInputStream(bs);
-    	long result;
-		try {
-			result = ds.readLong();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		} 
-        return result;  
+        long value = 0;
+        for (int i = 0; i < hashValue.length; i++) {
+            value += ((long) hashValue[i] & 0xffL) << (8 * i);
+        }
+        return value;
     }
-
 
     public GlobalKeyType getGlobalKeyType() {
         byte b1 = (byte) (hashValue[0] & KEEP_BIT_MASK);
         return GlobalKeyType.values()[b1];
     }
 
-
     public int calcFastHashCode() {
         return Arrays.hashCode(hashValue);
     }
-
 
     @Override
     public int hashCode() {
         return fastJavaHashCode;
     }
-
 
     @Override
     public boolean equals(Object obj) {
@@ -117,7 +98,6 @@ public class GlobalKey {
             return false;
         return true;
     }
-
 
     @Override
     public String toString() {

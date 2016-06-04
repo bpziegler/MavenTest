@@ -1,8 +1,6 @@
 package com.qualia.memgraph;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,9 +15,11 @@ import eu.bitwalker.useragentutils.UserAgent;
 public class CookieMemGraphLoader extends BaseFileLoader {
 
     private final ObjectMapper mapper = new ObjectMapper();
+    private final MemGraphMappingProcessor processor;
 
-    public CookieMemGraphLoader(Status status, File inputFile, String saveName) {
+    public CookieMemGraphLoader(Status status, File inputFile, String saveName, MemGraphMappingProcessor processor) {
         super(status, inputFile, saveName);
+        this.processor = processor;
     }
 
     @Override
@@ -39,7 +39,7 @@ public class CookieMemGraphLoader extends BaseFileLoader {
         String os = agent.getOperatingSystem().getGroup().getName();
         String browser = agent.getBrowser().getGroup().getName();
 
-        List<GlobalKey> mapping = new ArrayList<GlobalKey>();
+        MappingList mapping = new MappingList();
 
         // We will skip mappings when the lr cookie is not read
         boolean lr_cookie_read = false;
@@ -77,7 +77,7 @@ public class CookieMemGraphLoader extends BaseFileLoader {
 //                }
             }
 
-            // storage.saveMapping(mapping);
+            processor.addMapping(mapping);
         }
     }
 
