@@ -8,7 +8,7 @@ public class MemoryGraph {
 
     private static final Logger LOG = Logger.getLogger(MemoryGraph.class.getName());
 
-    private static final int MAX_SET_SIZE = 128 * 1024;
+    private static final int MAX_SET_SIZE = 4 * 1024 * 1024;
 
     private TreeSet<MemPair> memSet = new TreeSet<MemPair>();
     private TreeSet<MemPair> deletes = new TreeSet<MemPair>(); // TODO - support deletes
@@ -27,18 +27,19 @@ public class MemoryGraph {
 
         if (memSet.size() >= MAX_SET_SIZE) {
             mergeMemorySetToArrays();
-            memSet.clear();
         }
     }
 
     public void mergeMemorySetToArrays() {
         // This currently creates two copies. In the future might be able to do an in-place merge to save memory.
 
-        int len = srcAry.length + memSet.size();
-        long[] newSrcAry = new long[len];
-        long[] newDestAry = new long[len];
+        int aryLen = srcAry.length;
+        int memSetLen = memSet.size();
+        int totLen = srcAry.length + memSet.size();
+        long[] newSrcAry = new long[totLen];
+        long[] newDestAry = new long[totLen];
 
-        LOG.info(String.format("Merging arrays %d + %d = %d", srcAry.length, memSet.size(), len));
+        long startTime = System.currentTimeMillis();
 
         int i = 0;
         int j = 0;
@@ -94,6 +95,13 @@ public class MemoryGraph {
 
         srcAry = newSrcAry;
         destAry = newDestAry;
+        memSet.clear();
+
+        long elap = System.currentTimeMillis() - startTime;
+
+        LOG.info(String.format("MB %,6d   Elap %,5d   Merged arrays %,d + %,d = %,d", getUsedMem() / (1024 * 1024), elap, aryLen,
+                memSetLen, totLen));
+
     }
 
     public boolean contains(long src, long dest) {
@@ -127,6 +135,12 @@ public class MemoryGraph {
         }
     }
 
+    private static long getUsedMem() {
+        long maxMem = Runtime.getRuntime().totalMemory();
+        long freeMem = Runtime.getRuntime().freeMemory();
+        return maxMem - freeMem;
+    }
+
     private int compareIdx(int idx, long src, long dest) {
         int c1 = Long.compare(srcAry[idx], src);
         if (c1 != 0) {
@@ -136,21 +150,26 @@ public class MemoryGraph {
     }
 
     public static void main(String[] args) {
+        System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS %4$s  %5$s%6$s%n");
+
         LOG.info("Started");
         long startTime = System.currentTimeMillis();
         MemoryGraph memGraph = new MemoryGraph();
 
-        for (long i = 0; i < 2000; i++) {
-            for (long j = 0; j < 2000; j++) {
+        for (long i = 0; i < 8000; i++) {
+            for (long j = 0; j < 8000; j++) {
                 memGraph.add(i, j);
             }
         }
 
         memGraph.mergeMemorySetToArrays();
 
-        for (int i = 0; i < 100; i++) {
-            LOG.info(String.format("%d %d", memGraph.srcAry[i], memGraph.destAry[i]));
-        }
+        // for (int i = 0; i < 100; i++) {
+        // LOG.info(String.format("%d %d", memGraph.srcAry[i], memGraph.destAry[i]));
+        // }
+
+        System.gc();
+        LOG.info("Mem Used MB = " + getUsedMem() / (1024 * 1024));
 
         long elap = System.currentTimeMillis() - startTime;
         LOG.info("Finished   elap " + elap);
