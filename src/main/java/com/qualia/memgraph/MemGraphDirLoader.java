@@ -26,7 +26,7 @@ public class MemGraphDirLoader extends BaseDirLoader {
 
     public static void main(String[] args) throws InterruptedException {
         String dir = "D:/NoSave/work/test_data/cookie_files";
-        dir = "D:/NoSave/work/test_data/cookie_files/d=2015-07-01";
+        // dir = "D:/NoSave/work/test_data/cookie_files/d=2015-07-01";
         if (args.length > 0)
             dir = args[0];
 
