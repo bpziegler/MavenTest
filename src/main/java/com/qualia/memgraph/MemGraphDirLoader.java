@@ -8,6 +8,8 @@ import com.qualia.keystore_graph.Status;
 
 public class MemGraphDirLoader extends BaseDirLoader {
     
+    MemGraphMappingProcessor processor = new MemGraphMappingProcessor();
+
     @Override
     public void loadAllFiles(File loadDir) throws InterruptedException {
         processor.startThread();
@@ -15,8 +17,6 @@ public class MemGraphDirLoader extends BaseDirLoader {
         processor.done.set(true);
         processor.join();
     }
-
-    MemGraphMappingProcessor processor = new MemGraphMappingProcessor();
 
     @Override
     protected void processFile(Status status, ExecutorService service, File oneFile, String pathLower, String saveName) {
