@@ -10,6 +10,8 @@ import java.util.zip.GZIPInputStream;
 
 import com.google.common.io.CountingInputStream;
 
+// TODO:  Refactor FileLoader to descend from BaseFileLoader (I just copied it here and removed references to GraphStorage)
+
 public abstract class BaseFileLoader implements Runnable {
 
     protected final Status status;
