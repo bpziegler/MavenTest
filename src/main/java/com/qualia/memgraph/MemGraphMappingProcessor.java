@@ -92,11 +92,11 @@ public class MemGraphMappingProcessor implements Runnable {
             saveMappingPair(first, oneOther);
             saveMappingPair(oneOther, first);
         }
-        
+
         numProcess++;
         if (numProcess % 100000 == 0) {
             String status = String.format("Processed %,12d", numProcess);
-            System.out.println(status);
+            // System.out.println(status);
         }
     }
 
