@@ -1,6 +1,7 @@
 package com.qualia.memgraph;
 
 import java.io.File;
+import java.io.IOException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,6 +21,26 @@ public class CookieMemGraphLoader extends BaseFileLoader {
     public CookieMemGraphLoader(Status status, File inputFile, String saveName, MemGraphMappingProcessor processor) {
         super(status, inputFile, saveName);
         this.processor = processor;
+    }
+
+    @Override
+    protected void processFile() throws IOException {
+        super.processFile();
+        try {
+            processor.flush();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    protected void processError(IOException e) {
+        super.processError(e);
+        try {
+            processor.flush();
+        } catch (InterruptedException e2) {
+            throw new RuntimeException(e2);
+        }
     }
 
     @Override
