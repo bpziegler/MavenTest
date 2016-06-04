@@ -4,6 +4,13 @@ import java.util.Iterator;
 import java.util.TreeSet;
 import java.util.logging.Logger;
 
+/*
+ * TODO:
+ * 
+ * - Check if we will exceed java array max size (2^31)
+ * 
+ */
+
 public class MemoryGraph {
 
     private static final Logger LOG = Logger.getLogger(MemoryGraph.class.getName());
@@ -135,7 +142,7 @@ public class MemoryGraph {
         }
     }
 
-    private static long getUsedMem() {
+    public static long getUsedMem() {
         long maxMem = Runtime.getRuntime().totalMemory();
         long freeMem = Runtime.getRuntime().freeMemory();
         return maxMem - freeMem;
@@ -147,6 +154,10 @@ public class MemoryGraph {
             return c1;
         }
         return Long.compare(destAry[idx], dest);
+    }
+    
+    public int size() {
+        return srcAry.length + memSet.size();
     }
 
     public static void main(String[] args) {

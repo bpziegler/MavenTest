@@ -1,7 +1,6 @@
 package com.qualia.memgraph;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -75,6 +74,11 @@ public class MemGraphMappingProcessor implements Runnable {
                 break;
             }
         }
+
+        memoryGraph.mergeMemorySetToArrays();
+        System.gc();
+        System.out.println(String.format("Number of mappings = %,d", memoryGraph.size()));
+        System.out.println(String.format("UsedMB = %,d", memoryGraph.getUsedMem() / (1024 * 1024)));
     }
 
     private void processMappingBatch(MappingBatch mappingBatch) {
@@ -85,7 +89,6 @@ public class MemGraphMappingProcessor implements Runnable {
 
     private void processMappingList(MappingList mappingList) {
         List<GlobalKey> copy = new ArrayList<GlobalKey>(mappingList);
-        Collections.shuffle(copy);
 
         GlobalKey first = copy.remove(0);
         for (GlobalKey oneOther : copy) {
@@ -94,10 +97,6 @@ public class MemGraphMappingProcessor implements Runnable {
         }
 
         numProcess++;
-        if (numProcess % 100000 == 0) {
-            String status = String.format("Processed %,12d", numProcess);
-            // System.out.println(status);
-        }
     }
 
     private void saveMappingPair(GlobalKey first, GlobalKey second) {

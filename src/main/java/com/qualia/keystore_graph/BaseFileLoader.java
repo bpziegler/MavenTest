@@ -34,7 +34,7 @@ public abstract class BaseFileLoader implements Runnable {
         } catch (IOException e) {
             status.numErrors.incrementAndGet();
             System.out.println("Error loading file " + inputFile.getName() + "   " + e.getMessage());
-            e.printStackTrace();
+            // e.printStackTrace();
             try {
                 processError(e);
             } catch (Exception e1) {
