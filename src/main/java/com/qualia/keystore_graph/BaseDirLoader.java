@@ -36,7 +36,7 @@ public abstract class BaseDirLoader {
         // Need to be careful, the more we run in parallel, the higher chance a file will be loaded "out of order"
         // and mess up the "last_seen" properties. (We expect the files to be loaded in date order).
         // numCpu = Math.min(4, numCpu);
-        ExecutorService service = Executors.newFixedThreadPool(numCpu);
+        ExecutorService service = Executors.newFixedThreadPool(4);
 
         // Process all files
         for (File oneFile : files) {
