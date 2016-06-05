@@ -11,58 +11,58 @@ import org.rocksdb.RocksDBException;
 
 public class Database {
 
-	private static final Object LOCK = new Object();
-	private static final Map<String, RocksDB> dbMap = new HashMap<String, RocksDB>();
+    private static final Object LOCK = new Object();
+    private static final Map<String, RocksDB> dbMap = new HashMap<String, RocksDB>();
 
-	public static RocksDB getDb(String path, boolean compress, boolean readOnly) throws RocksDBException {
-		synchronized (LOCK) {
-			RocksDB result = dbMap.get(path);
-			if (result == null) {
-				result = initDb(path, compress, readOnly);
-				dbMap.put(path, result);
-			}
-			return result;
-		}
-	}
-	
-	public static void close() {
-		synchronized (LOCK) {
-			for (RocksDB db : dbMap.values()) {
-				db.close();
-				db.dispose();
-			}
-		}
-	}
+    public static RocksDB getDb(String path, boolean compress, boolean readOnly) throws RocksDBException {
+        synchronized (LOCK) {
+            RocksDB result = dbMap.get(path);
+            if (result == null) {
+                result = initDb(path, compress, readOnly);
+                dbMap.put(path, result);
+            }
+            return result;
+        }
+    }
 
-	private static RocksDB initDb(String path, boolean compress, boolean readOnly) throws RocksDBException {
-		synchronized (LOCK) {
-			RocksDB.loadLibrary();
-			RocksDB db;
+    public static void close() {
+        synchronized (LOCK) {
+            for (RocksDB db : dbMap.values()) {
+                db.close();
+                db.dispose();
+            }
+        }
+    }
 
-			if (readOnly) {
-				db = RocksDB.openReadOnly(path);
-			} else {
-				Options options = getDefaultOptions(compress);
+    private static RocksDB initDb(String path, boolean compress, boolean readOnly) throws RocksDBException {
+        synchronized (LOCK) {
+            RocksDB.loadLibrary();
+            RocksDB db;
 
-				db = RocksDB.open(options, path);
-			}
+            if (readOnly) {
+                db = RocksDB.openReadOnly(path);
+            } else {
+                Options options = getDefaultOptions(compress);
 
-			return db;
-		}
-	}
+                db = RocksDB.open(options, path);
+            }
 
-	public static Options getDefaultOptions(boolean compress) {
-		Options options = new Options();
-		options.setCompactionStyle(CompactionStyle.UNIVERSAL);
-		if (compress) {
-			options.setCompressionType(CompressionType.SNAPPY_COMPRESSION);
-		}
-		options.setCreateIfMissing(true);
-		options.setIncreaseParallelism(4);
-		options.setMaxBackgroundCompactions(2);
-		options.setMaxBackgroundFlushes(2);
-		options.setWriteBufferSize(8 * 1024 * 1024);
-		return options;
-	}
+            return db;
+        }
+    }
+
+    public static Options getDefaultOptions(boolean compress) {
+        Options options = new Options();
+        options.setCompactionStyle(CompactionStyle.UNIVERSAL);
+        if (compress) {
+            options.setCompressionType(CompressionType.SNAPPY_COMPRESSION);
+        }
+        options.setCreateIfMissing(true);
+        options.setIncreaseParallelism(4);
+        options.setMaxBackgroundCompactions(2);
+        options.setMaxBackgroundFlushes(2);
+        options.setWriteBufferSize(8 * 1024 * 1024);
+        return options;
+    }
 
 }

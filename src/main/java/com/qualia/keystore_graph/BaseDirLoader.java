@@ -14,7 +14,7 @@ public abstract class BaseDirLoader {
 
     private final List<File> files = new ArrayList<File>();
 
-    public void loadAllFiles(File loadDir) throws InterruptedException {
+    public void loadAllFiles(File loadDir) throws Exception {
         System.out.println("Started at " + DateTime.now());
         System.out.println("Scanning Files Dir = " + loadDir.getAbsolutePath());
         recurPopulateFiles(loadDir);
@@ -77,14 +77,4 @@ public abstract class BaseDirLoader {
             }
         }
     }
-
-    public static void main(String[] args) throws InterruptedException {
-        String dir = "test_data";
-        if (args.length > 0)
-            dir = args[0];
-
-        DirLoader dirLoader = new DirLoader();
-        dirLoader.loadAllFiles(new File(dir));
-    }
-
 }

@@ -1,11 +1,15 @@
 package com.qualia.memgraph;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.node.ArrayNode;
+import org.codehaus.jackson.node.ObjectNode;
+
 import com.qualia.keystore_graph.BaseFileLoader;
 import com.qualia.keystore_graph.Constants;
 import com.qualia.keystore_graph.GlobalKey;
@@ -17,10 +21,13 @@ public class CookieMemGraphLoader extends BaseFileLoader {
 
     private final ObjectMapper mapper = new ObjectMapper();
     private final MemGraphMappingProcessor processor;
+    private BufferedWriter hashLookupStream;
 
-    public CookieMemGraphLoader(Status status, File inputFile, String saveName, MemGraphMappingProcessor processor) {
+    public CookieMemGraphLoader(Status status, File inputFile, String saveName, MemGraphMappingProcessor processor,
+            BufferedWriter hashLookupStream) {
         super(status, inputFile, saveName);
         this.processor = processor;
+        this.hashLookupStream = hashLookupStream;
     }
 
     @Override
@@ -88,17 +95,20 @@ public class CookieMemGraphLoader extends BaseFileLoader {
                 }
                 GlobalKey key = GlobalKey.createFromPidUid(pid, uid);
                 mapping.add(key);
-                // TODO:  Save properties to key value store
-//                storage.saveHashLookup(key, pid + "_" + uid);
-//                storage.saveProperty(key, PropertyLabel.LAST_SEEN, dateInt);
-//                if (pid.equals("lr")) {
-//                    storage.saveIPMapping(key, ipInt, dateInt);
-//                    storage.saveProperty(key, PropertyLabel.BROWSER, browser);
-//                    storage.saveProperty(key, PropertyLabel.PLATFORM, os);
-//                }
+                saveHashLookup(key, pid + "_" + uid);
             }
 
             processor.addMapping(mapping);
+        }
+    }
+
+    public void saveHashLookup(GlobalKey globalKey, String origId) throws IOException {
+        ObjectNode objNode = mapper.createObjectNode();
+        objNode.put("origId", origId);
+        objNode.put("key", Arrays.toString(globalKey.getHashValue()));
+        synchronized (hashLookupStream) {
+            hashLookupStream.write(objNode.toString());
+            hashLookupStream.newLine();
         }
     }
 
