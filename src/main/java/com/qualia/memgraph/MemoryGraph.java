@@ -15,7 +15,7 @@ public class MemoryGraph {
 
     private static final Logger LOG = Logger.getLogger(MemoryGraph.class.getName());
 
-    private static final int MAX_SET_SIZE = 4 * 1024 * 1024;
+    private static final int MIN_SET_SIZE = 4 * 1024;
 
     private TreeSet<MemPair> memSet = new TreeSet<MemPair>();
     private TreeSet<MemPair> deletes = new TreeSet<MemPair>(); // TODO - support deletes
@@ -32,7 +32,8 @@ public class MemoryGraph {
         MemPair memPair = new MemPair(src, dest);
         memSet.add(memPair);
 
-        if (memSet.size() >= MAX_SET_SIZE) {
+        int threshold = (int) (srcAry.length * 0.15);
+        if ((memSet.size() >= MIN_SET_SIZE) && (memSet.size() >= threshold)) {
             mergeMemorySetToArrays();
         }
     }
@@ -167,8 +168,8 @@ public class MemoryGraph {
         long startTime = System.currentTimeMillis();
         MemoryGraph memGraph = new MemoryGraph();
 
-        for (long i = 0; i < 8000; i++) {
-            for (long j = 0; j < 8000; j++) {
+        for (long i = 0; i < 15000; i++) {
+            for (long j = 0; j < 15000; j++) {
                 memGraph.add(i, j);
             }
         }

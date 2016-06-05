@@ -72,7 +72,7 @@ public abstract class BaseFileLoader implements Runnable {
             curLine++;
             linesToSend++;
 
-            if (linesToSend >= 100) {
+            if (linesToSend >= 10000) {
                 sendStatus(cs);
             }
         }
