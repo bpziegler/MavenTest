@@ -3,6 +3,7 @@ package com.qualia.log_patterns;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -11,12 +12,14 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import com.google.common.base.Charsets;
 import com.qualia.util.ILineProcessor;
 import com.qualia.util.MultiFileLineProcessor;
 
 
 public class LogFilePatterns {
 
+    private static final int MIN_LINES_TO_SAVE_NODE = 10000;
     private static final int MAX_LINES_TO_READ = 1000000;
 
 
@@ -60,15 +63,46 @@ public class LogFilePatterns {
 
 
     public static void writeAllNodes(List<Node> leafNodes) throws IOException {
-        FileOutputStream fs = new FileOutputStream("log_nodes.txt");
-        OutputStreamWriter osw = new OutputStreamWriter(fs);
-        final BufferedWriter bw = new BufferedWriter(osw);
+        final BufferedWriter bw = createBufferedWriter(new File("log_nodes.txt"));
 
         for (Node node : leafNodes) {
             writeNode(bw, node);
+
+            if (node.isLeafNode() && node.lines.size() > MIN_LINES_TO_SAVE_NODE) {
+                saveNodeToFile(node);
+            }
         }
 
         bw.close();
+    }
+
+
+    private static void saveNodeToFile(Node node) throws IOException {
+        File dir = new File("saved_nodes");
+        dir.mkdirs();
+
+        String name = node.conditionString();
+        name = name.replaceAll(" ", "_");
+        name = name.replaceAll("!", "-");
+        name = name + ".txt";
+        System.out.println("Saving " + name);
+        File node_save_path = new File(dir, name);
+        BufferedWriter bw = createBufferedWriter(node_save_path);
+
+        for (String line : node.lines) {
+            bw.write(line);
+            bw.newLine();
+        }
+
+        bw.close();
+    }
+
+
+    private static BufferedWriter createBufferedWriter(File path) throws FileNotFoundException {
+        FileOutputStream fs = new FileOutputStream(path);
+        OutputStreamWriter osw = new OutputStreamWriter(fs, Charsets.UTF_8);
+        final BufferedWriter bw = new BufferedWriter(osw);
+        return bw;
     }
 
 

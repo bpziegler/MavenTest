@@ -16,3 +16,6 @@
 /properties.txt
 node-id-map/
 /hash_lookups.txt
+/google_instances.txt
+/log_nodes.txt
+/saved_nodes/
