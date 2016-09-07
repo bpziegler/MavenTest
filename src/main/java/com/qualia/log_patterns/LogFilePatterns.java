@@ -150,6 +150,7 @@ public class LogFilePatterns {
 
     public static void main(String[] args) throws IOException {
         String logPath = "/Users/benziegler/test_data/workflow_logs/oIqWorkflow.2016-08-21_17-22-47.log";
+        logPath = "/Users/benziegler/messages.log";
 
         LogFilePatterns prog = new LogFilePatterns();
         prog.run(logPath);

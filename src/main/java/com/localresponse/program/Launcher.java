@@ -29,6 +29,7 @@ import com.qualia.scoring.SemantriaMT;
 import com.qualia.test.JettyTest;
 import com.qualia.test.RocksScan;
 import com.qualia.test.SkipTool;
+import com.qualia.util.GCloudIPs;
 import com.qualia.util.UniqueLines;
 
 
@@ -62,6 +63,7 @@ public class Launcher {
         register(ProcessAddThis.class);
         register(RocksScan.class);
         register(MemGraphDirLoader.class);
+        register(GCloudIPs.class);
     }
 
 
@@ -87,6 +89,11 @@ public class Launcher {
             }
         }
 
+        if (runClass == null) {
+            System.out.println("Error:  You must pass a class/program name as the first argument");
+            return;
+        }
+
         List<String> newArgs = new ArrayList<String>(Arrays.asList(args));
         if (newArgs.size() > 0) {
             newArgs.remove(0);
@@ -101,5 +108,4 @@ public class Launcher {
         }
     }
 
-    
 }
