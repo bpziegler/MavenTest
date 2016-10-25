@@ -39,6 +39,13 @@ public class MultiFileLineProcessor {
     }
 
 
+    public void processOneFile(File oneFile, ILineProcessor lineProcessor) throws IOException {
+        List<File> fileList = new ArrayList<File>();
+        fileList.add(oneFile);
+        processFiles(fileList, lineProcessor);
+    }
+
+
     public void processFiles(Collection<File> files, ILineProcessor lineProcessor) throws IOException {
         this.lineProcessor = lineProcessor;
         totBytes = 0;
@@ -68,7 +75,7 @@ public class MultiFileLineProcessor {
 
 
     private void processFile(File oneFile, int fileNum) throws IOException {
-        // System.out.println("Process file:  " + oneFile.getAbsolutePath());
+        // System.out.println("Process file: " + oneFile.getAbsolutePath());
 
         FileInputStream fs = new FileInputStream(oneFile);
         CountingInputStream cs = new CountingInputStream(fs);

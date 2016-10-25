@@ -30,6 +30,7 @@ import com.qualia.test.JettyTest;
 import com.qualia.test.RocksScan;
 import com.qualia.test.SkipTool;
 import com.qualia.util.GCloudIPs;
+import com.qualia.util.MakeJson;
 import com.qualia.util.UniqueLines;
 
 
@@ -64,6 +65,7 @@ public class Launcher {
         register(RocksScan.class);
         register(MemGraphDirLoader.class);
         register(GCloudIPs.class);
+        register(MakeJson.class);
     }
 
 
