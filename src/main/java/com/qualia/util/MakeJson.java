@@ -57,7 +57,7 @@ public class MakeJson implements ILineProcessor {
 
     public static void main(String[] args) throws IOException {
         String inputPath = args[0];
-        String outputPath = inputPath = "_json.gz";
+        String outputPath = inputPath + "_json.gz";
 
         MakeJson program = new MakeJson();
         program.run(inputPath, outputPath);
