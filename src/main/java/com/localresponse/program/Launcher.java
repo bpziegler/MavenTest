@@ -22,6 +22,7 @@ import com.qualia.keystore_graph.DumpClusters;
 import com.qualia.keystore_graph.GraphStorageTest;
 import com.qualia.keystore_graph.HashReport;
 import com.qualia.keystore_graph.KeyStoreAddThisMappingLoader;
+import com.qualia.location.RadiusFilter;
 import com.qualia.memgraph.MemGraphDirLoader;
 import com.qualia.scoring.AnalyzeSemantria;
 import com.qualia.scoring.ProcessAddThis;
@@ -66,6 +67,7 @@ public class Launcher {
         register(MemGraphDirLoader.class);
         register(GCloudIPs.class);
         register(MakeJson.class);
+        register(RadiusFilter.class);
     }
 
 
