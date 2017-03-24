@@ -24,9 +24,11 @@ public class RandomReadWriteTest {
         final String TEST_FILE_PATH = "test_sim_file.dat";
 
         final RandomAccessFile simFile = new RandomAccessFile(TEST_FILE_PATH, "rw");
+        LOG.info("Creating test file    size = " + simOptions.fileLen);
         simFile.setLength(simOptions.fileLen);
         final AtomicBoolean doneFlag = new AtomicBoolean(false);
 
+        LOG.info("Creating Read/Write threads");
         List<Thread> threads = new ArrayList<Thread>();
         for (int i = 0; i < simOptions.readThreads; i++) {
             SimReadWriteThread thread = new SimReadWriteThread(simOptions, SimType.READ, simFile, doneFlag);
@@ -45,8 +47,7 @@ public class RandomReadWriteTest {
             if (elap >= simOptions.simTimeSec) {
                 break;
             }
-            LOG.info(String.format("Elap %6.2f   numReads %,6d   numWrites %,6d", elap, simOptions.numReads.get(),
-                    simOptions.numWrites.get()));
+            logStats(simOptions, startTime);
             Thread.sleep(100);
         }
 
@@ -56,16 +57,25 @@ public class RandomReadWriteTest {
         for (Thread thread : threads) {
             thread.join();
         }
+        LOG.info("Closing file");
+        simFile.close();
 
-        double elap = (System.currentTimeMillis() - startTime + 0.0) / 1000;
-        double readPerSec = simOptions.numReads.get() / elap;
-        double writePerSec = simOptions.numWrites.get() / elap;
-
-        LOG.info(String.format("Final stats   reads/sec = %,6.0f   writes/sec = %,6.0f", readPerSec, writePerSec));
+        logStats(simOptions, startTime);
 
         LOG.info("Deleting test file");
         new File(TEST_FILE_PATH).delete();
         LOG.info("Finished");
+    }
+
+
+    private void logStats(ReadWriteSimOptions simOptions, long startTime) {
+        double elap = (System.currentTimeMillis() - startTime + 0.0) / 1000;
+        int numRead = simOptions.numReads.get();
+        int numWrite = simOptions.numWrites.get();
+        double readPerSec = numRead / elap;
+        double writePerSec = numWrite / elap;
+
+        LOG.info(String.format("Elap %6.2f   numRead %,8d   numWrite %,8d   reads/sec = %,6.0f   writes/sec = %,6.0f", elap, numRead, numWrite, readPerSec, writePerSec));
     }
 
 
