@@ -29,6 +29,8 @@ public class RadiusFilter {
     private double meters;
     private SpatialContext geo;
     private Point filterPoint;
+    private int numMatch;
+    protected int lineErrors;
 
 
     public void filterFile(String inputPath, String outputPath, double lat, double lon, double meters)
@@ -43,20 +45,20 @@ public class RadiusFilter {
 
 
         MultiFileLineProcessor processor = new MultiFileLineProcessor();
-        processor.processOneFile(new File(inputPath), new ILineProcessor() {
+        processor.processDir(inputPath, new ILineProcessor() {
             @Override
             public void processLine(String line, long curLine) {
                 try {
                     RadiusFilter.this.processLine(line, curLine);
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    lineErrors++;
                 }
             }
 
 
             @Override
             public String getStatus() {
-                return null;
+                return String.format("%,d matches   %,d lineErrors", numMatch, lineErrors);
             }
         });
 
@@ -73,18 +75,20 @@ public class RadiusFilter {
         double disKM = degrees / (180 / Math.PI) * 6378.1; // kilometers of the radius of the earth = 6378.1
         double disMeters = disKM * 1000;
         if (disMeters <= meters) {
-            bw.write(String.format("%0.2f,%s", disMeters, line));
+            numMatch++;
+            bw.write(String.format("%1.2f,%s", disMeters, line));
+            bw.newLine();
         }
     }
 
 
     public static void main(String[] args) throws Exception {
         Options options = new Options();
-        options.addOption("t", "lat", true, "latitude");
-        options.addOption("g", "long", true, "longitude");
-        options.addOption("i", "input", true, "input file (Qualia location format)");
+        options.addOption("i", "input", true, "input dir (fiels in Qualia location format)");
         options.addOption("o", "output", true, "output file (Qualia location with distance prepended)");
-        options.addOption("d", "distance", true, "distance in meters to include location points");
+        options.addOption("t", "lat", true, "latitude (x), default 40.745686 for Qualia");
+        options.addOption("g", "long", true, "longitude (y), default -73.989565 for Qualia");
+        options.addOption("d", "distance", true, "distance in meters to include location points, default 1000");
         options.addOption("h", "help", false, "Print usage help");
 
         CommandLineParser parser = new BasicParser();
@@ -97,11 +101,11 @@ public class RadiusFilter {
             return;
         }
 
-        Double lat = Double.valueOf(cmd.getOptionValue("lat"));
-        Double lon = Double.valueOf(cmd.getOptionValue("long"));
-        Double dis = Double.valueOf(cmd.getOptionValue("distance"));
+        Double lat = Double.valueOf(cmd.getOptionValue("lat", "40.745686"));
+        Double lon = Double.valueOf(cmd.getOptionValue("long", "-73.989565"));
+        Double dis = Double.valueOf(cmd.getOptionValue("distance", "1000"));
         String inputPath = cmd.getOptionValue("input");
-        String outputPath = cmd.getOptionValue("outputPath");
+        String outputPath = cmd.getOptionValue("output");
 
         RadiusFilter program = new RadiusFilter();
         program.filterFile(inputPath, outputPath, lat, lon, dis);

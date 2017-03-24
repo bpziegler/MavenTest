@@ -28,6 +28,7 @@ import com.qualia.scoring.AnalyzeSemantria;
 import com.qualia.scoring.ProcessAddThis;
 import com.qualia.scoring.SemantriaMT;
 import com.qualia.test.JettyTest;
+import com.qualia.test.RandomReadWriteTest;
 import com.qualia.test.RocksScan;
 import com.qualia.test.SkipTool;
 import com.qualia.util.GCloudIPs;
@@ -68,6 +69,7 @@ public class Launcher {
         register(GCloudIPs.class);
         register(MakeJson.class);
         register(RadiusFilter.class);
+        register(RandomReadWriteTest.class);
     }
 
 
