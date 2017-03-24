@@ -24,6 +24,7 @@ public class ReadWriteSimOptions {
     public int writeThreads;
     public List<Integer> readSizes;
     public List<Integer> writeSizes;
+    public Boolean useCache;
 
     public long fileLen;
     public final AtomicInteger numReads = new AtomicInteger();
@@ -53,6 +54,8 @@ public class ReadWriteSimOptions {
                 "Read size in bytes, comma seperated list, picks read size with uniform random number (default 4096)");
         options.addOption("ws", "write-size", true,
                 "Write size in bytes, comma seperated list, picks read size with uniform random number (default 4096");
+        options.addOption("c", "use-cache", true,
+                "Use cache.  If false all writes are flushed immediately to disk (default true)");
         options.addOption("h", "help", false, "Print usage help");
 
         CommandLineParser parser = new BasicParser();
@@ -75,6 +78,7 @@ public class ReadWriteSimOptions {
         String writeSizesStr = cmd.getOptionValue("write-size", "4096");
         simOptions.readSizes = parseSizesStr(readSizesStr);
         simOptions.writeSizes = parseSizesStr(writeSizesStr);
+        simOptions.useCache = Boolean.valueOf(cmd.getOptionValue("use-cache", "true"));
 
         return simOptions;
     }

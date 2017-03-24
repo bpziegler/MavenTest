@@ -23,7 +23,7 @@ public class RandomReadWriteTest {
 
         final String TEST_FILE_PATH = "test_sim_file.dat";
 
-        final RandomAccessFile simFile = new RandomAccessFile(TEST_FILE_PATH, "rw");
+        final RandomAccessFile simFile = new RandomAccessFile(TEST_FILE_PATH, (simOptions.useCache) ? "rw" : "rwd");
         LOG.info("Creating test file    size = " + simOptions.fileLen);
         simFile.setLength(simOptions.fileLen);
         final AtomicBoolean doneFlag = new AtomicBoolean(false);
