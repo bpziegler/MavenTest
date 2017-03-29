@@ -99,6 +99,8 @@ public class ReadWriteSimOptions {
         builder.append(readSizes);
         builder.append(", writeSizes=");
         builder.append(writeSizes);
+        builder.append(", useCache=");
+        builder.append(useCache);
         builder.append("]");
         return builder.toString();
     }
